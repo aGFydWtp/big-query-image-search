@@ -24,7 +24,7 @@
   - _Boundary: RootModuleConfig_
   - _Depends: 1.1_
 
-- [ ] 1.4 必要 GCP API の有効化を定義する
+- [x] 1.4 必要 GCP API の有効化を定義する
   - `apis.tf` に `google_project_service` で BigQuery・BigQuery Connection・Vertex AI(aiplatform)・Cloud Run・Cloud Storage・IAM を有効化する
   - 有効化対象 API をコード上の一覧として明示し、再 apply で冪等にする
   - 完了条件: `apply` 後に対象 API がすべて有効化され、再 apply で差分が出ない

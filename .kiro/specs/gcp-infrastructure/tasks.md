@@ -50,7 +50,7 @@
   - _Boundary: BigQueryDataset_
   - _Depends: 1.4_
 
-- [ ] 2.3 (P) BigLake 用 Cloud Resource 接続を定義する
+- [x] 2.3 (P) BigLake 用 Cloud Resource 接続を定義する
   - `connection.tf` に `google_bigquery_connection` を `cloud_resource {}` 付き・`region` 由来 location で作成する
   - 接続 SA 識別子を属性参照で取得可能にする
   - リモートモデル DDL は作成せず、接続 ID と接続 SA の払い出しに限定する

@@ -59,7 +59,7 @@
   - _Boundary: BigLakeConnection_
   - _Depends: 1.4_
 
-- [ ] 2.4 (P) Cloud Run 実行用サービスアカウントを定義する
+- [x] 2.4 (P) Cloud Run 実行用サービスアカウントを定義する
   - `cloud_run_sa.tf` に `google_service_account` を Cloud Run 実行用として作成する
   - Cloud Run サービス本体（コンテナイメージのデプロイ）は作成しない
   - 完了条件: `apply` で SA が作成され、SA メールが参照でき、サービス本体は構成に含まれない

@@ -8,7 +8,7 @@
   - _Requirements: 6.1_
   - _Boundary: RootModuleConfig_
 
-- [ ] 1.2 入力変数とリージョン導出・バリデーションを定義する
+- [x] 1.2 入力変数とリージョン導出・バリデーションを定義する
   - `variables.tf` に `project_id`・`region`・命名プレフィックス・state バケット等の入力変数を定義する
   - 必須変数に `validation` を設定し、欠落時に apply 前に失敗させる
   - 全リソースのロケーションを単一 `region` から導出する方針を変数として固定する
@@ -117,3 +117,9 @@
   - 完了条件: 各 SA の権限・公開抑止・境界（DDL/サービス本体非作成）がすべて確認できる
   - _Requirements: 2.4, 4.4, 4.5, 5.2, 5.3, 4.6, 5.5_
   - _Depends: 3.1, 3.2_
+
+## Implementation Notes
+- 環境: terraform CLI は未インストールだったため `/Users/haruki/.local/bin/terraform`（v1.9.8）をローカル設置。GCP ADC は未設定のため `terraform apply` は実行不可（タスク4.2 と 4.3 のライブ apply 検証は明示承認＋ADC が必要）。
+- 1.2: ロケーション導出は `terraform/locals.tf` の `local.location`（= var.region）に集約。下流ファイルは `var.region` / `var.image_bucket_name` を直接参照せず `local.location` / `local.image_bucket_name` を参照すること。
+- 1.2: state バケットは backend 部分設定で扱い `var.*` 化しない（Terraform 言語制約）。リージョン許可リストは `["us-central1"]`（gemini-embedding-2 は US マルチリージョン or us-central1 シングルリージョンのみ提供確認、設計はシングルリージョン前提）。
+- 1.2: Terraform RE2 では `{1,1024}` の大きい上限を持つ interval 量指定子が誤動作したため、`dataset_id` は `^[A-Za-z0-9_]+$` + 別途 `length()<=1024` で検証。

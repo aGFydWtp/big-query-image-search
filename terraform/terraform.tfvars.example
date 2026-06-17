@@ -1,0 +1,32 @@
+# Example variable values for the GCP image-search infrastructure.
+# Copy to terraform.tfvars and fill in the required values.
+#
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# Note: the Terraform state bucket is NOT configured here. The GCS backend
+# bucket cannot reference var.* and is supplied separately via backend partial
+# config (see backend.tf / backend.hcl), e.g.:
+#   terraform init -backend-config="bucket=<state-bucket>"
+
+# Required: GCP project ID that owns all resources.
+project_id = "my-gcp-project"
+
+# Region from which all resource locations are derived. Must be an
+# embedding-model-supported single-region location (allow-list in variables.tf).
+region = "us-central1"
+
+# Optional: naming prefix for derived resource names.
+# name_prefix = "imgsearch"
+
+# Optional: BigQuery dataset ID.
+# dataset_id = "image_search"
+
+# Optional: BigLake cloud-resource connection ID.
+# connection_id = "image-search-biglake"
+
+# Optional: Cloud Run execution service account account ID.
+# run_sa_account_id = "img-search-run"
+
+# Optional: explicit image bucket name. When omitted/empty, the name is derived
+# as "<project_id>-<name_prefix>-images".
+# image_bucket_name = ""

@@ -1,7 +1,7 @@
 # Implementation Plan
 
 - [ ] 1. Foundation: Terraform ルートモジュールと共通構成
-- [ ] 1.1 バージョン制約と provider 設定を定義する
+- [x] 1.1 バージョン制約と provider 設定を定義する
   - `versions.tf` に terraform/google/google-beta のバージョン制約と `required_providers` を記述する
   - `providers.tf` に google / google-beta provider を `project_id` と `region` 変数で設定する
   - 完了条件: `terraform init` が成功し provider が解決される

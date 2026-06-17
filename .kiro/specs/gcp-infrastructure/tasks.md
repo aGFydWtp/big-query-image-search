@@ -84,7 +84,7 @@
   - _Boundary: CloudRunIam_
   - _Depends: 2.2, 2.4_
 
-- [ ] 3.3 払い出しリソース識別子の出力を定義する
+- [x] 3.3 払い出しリソース識別子の出力を定義する
   - `outputs.tf` に、画像バケット名・dataset（project 修飾識別子）・接続 ID・接続 SA・Cloud Run SA メールを出力する
   - 完了条件: `terraform output` が下流参照に必要な全識別子を非空で返す
   - _Requirements: 2.3, 3.3, 4.3, 5.4, 6.7_

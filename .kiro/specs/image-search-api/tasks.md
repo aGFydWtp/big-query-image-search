@@ -1,0 +1,73 @@
+# Implementation Plan
+
+- [ ] 1. プロジェクト基盤と設定モジュールの確立
+- [ ] 1.1 設定モジュール（Config）の実装
+  - 環境変数から `project_id`, `region`, `dataset_id`, `image_embeddings` テーブル名, モデル名 `gemini-embedding-2`, 対象 GCS バケットを読み込む
+  - 必須値欠如時はフェイルファストで起動失敗させ、いかなる環境依存値もコードへハードコードしない
+  - 観測可能な完了条件: 必須環境変数が揃えば設定オブジェクトを返し、欠如時は明確なエラーで起動を中止する単体テストが通る
+  - _Requirements: 2.5, 5.2, 5.3, 5.5_
+- [ ] 1.2 HTTP サーバ起動とルーティングの骨格実装
+  - サーバ起動・ポート待受・検索エンドポイントのルーティング・ヘルスチェックを用意
+  - 観測可能な完了条件: ローカル起動でヘルスチェックが 200 を返す
+  - _Requirements: 5.1, 5.3_
+  - _Depends: 1.1_
+
+- [ ] 2. 入力契約と検索クエリ層の実装
+- [ ] 2.1 入力バリデーション（InputValidation）の実装 (P)
+  - `query` 非空必須、空/欠如で 400 とし BigQuery を呼ばない
+  - `top_k` の許容範囲チェック（範囲外は 400 もしくは安全範囲へ丸めを一貫適用）、未指定時は既定件数
+  - 観測可能な完了条件: 空クエリ・top_k 境界値（0/負/上限超過）・未指定で期待どおりの判定となる単体テストが通る
+  - _Requirements: 1.3, 4.1, 4.2_
+  - _Boundary: InputValidation_
+  - _Depends: 1.1_
+- [ ] 2.2 検索 SQL テンプレートとクエリ組立て（SearchQueryBuilder）の実装 (P)
+  - `AI.GENERATE_EMBEDDING`（リモートモデル `gemini-embedding-2`）と `VECTOR_SEARCH`（対象 `image_embeddings.embedding`, `distance_type='COSINE'`, `top_k`）を同一 BigQuery クエリへ組み立てる
+  - モデル名・テーブル名・列名・距離タイプ・dataset を設定注入から参照し、コードへ再定義/ハードコードしない（次元 3072 は同一モデル使用で暗黙整合）
+  - `sql/search.sql` をプレースホルダ外部化テンプレートとして用意
+  - 観測可能な完了条件: 生成 SQL がモデル `gemini-embedding-2`・テーブル `image_embeddings`・`distance_type='COSINE'` を含み単一クエリであることを確認する単体テストが通る
+  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
+  - _Boundary: SearchQueryBuilder, sql/search.sql_
+  - _Depends: 1.1_
+
+- [ ] 3. BigQuery 実行と結果整形層の実装
+- [ ] 3.1 BigQuery クライアント（BigQueryClient）の実装
+  - パラメータ化クエリを単一ジョブとして実行し行を返す
+  - タイムアウト/クエリエラーを内部エラー型へ変換し、詳細をクライアントへ漏洩させない
+  - 観測可能な完了条件: 成功時に行を返し、失敗時に内部エラー型へ変換することを確認するテストが通る
+  - _Requirements: 2.3, 4.3_
+  - _Depends: 2.2_
+- [ ] 3.2 結果整形（ResultFormatter）の実装 (P)
+  - 各行から `image_uri`・スコアを抽出し、スコア降順（最類似順）に整列
+  - `VECTOR_SEARCH` の距離出力を一貫したスコア表現へ整形（意味を固定）、`content_type` を任意フィールドとして付加、0 件は空配列
+  - 観測可能な完了条件: 降順整列・スコア表現一貫・0 件空配列・メタデータ付加を確認する単体テストが通る
+  - _Requirements: 1.4, 3.1, 3.4, 3.5, 4.4_
+  - _Boundary: ResultFormatter_
+  - _Depends: 3.1_
+- [ ] 3.3 GCS 署名付き URL 生成（SignedUrlGenerator）の実装 (P)
+  - 要求時のみ対象バケットオブジェクトへ有効期限付き署名 URL を実行 SA 権限で発行
+  - 個別の署名失敗は当該項目で URL 省略/障害明示にとどめ、他結果返却を妨げない
+  - 観測可能な完了条件: 要求時に署名 URL を生成し、失敗時も他結果が返ることを確認するテストが通る
+  - _Requirements: 3.2, 3.3, 4.5_
+  - _Boundary: SignedUrlGenerator_
+  - _Depends: 1.1_
+
+- [ ] 4. API ハンドラ統合とレスポンス契約の確定
+- [ ] 4.1 検索エンドポイントハンドラ（ApiHandler）の実装と統合
+  - リクエスト JSON（`query`, `top_k?`, `signed_url?`）を解析し、検証→クエリ組立て→BigQuery 実行→整形→署名 URL を結線
+  - レスポンス/エラー JSON スキーマ（フィールド名・型）を安定契約として確定し、200/4xx/5xx をマッピング（内部詳細非漏洩）
+  - 観測可能な完了条件: 正常で 200 と結果配列、空クエリで 400（クエリ未実行）、内部失敗で 5xx かつ詳細非漏洩、エラー構造が共通であることを確認するテストが通る
+  - _Requirements: 1.1, 1.2, 1.5, 4.1, 4.3, 4.6_
+  - _Depends: 2.1, 2.2, 3.1, 3.2, 3.3_
+
+- [ ] 5. Cloud Run デプロイ構成と運用手順
+- [ ] 5.1 コンテナと Cloud Run サービス定義の作成 (P)
+  - `deploy/Dockerfile` と `deploy/service.yaml`（実行 SA 割当・環境変数・ポート・リソース）を用意し、ステートレス・最小権限・region 整合で動作させる
+  - `deploy/.env.example` に必須環境変数を網羅
+  - 観測可能な完了条件: サービス定義が上流払い出しの実行 SA と必須環境変数を参照し、ハードコードがないことを確認できる
+  - _Requirements: 5.1, 5.3, 5.4, 5.5_
+  - _Boundary: DeployConfig_
+- [ ] 5.2 運用 runbook の作成 (P)
+  - ビルド・デプロイ・必須環境変数・ローカル起動/検証手順を `docs/runbook.md` に記載
+  - 観測可能な完了条件: runbook 手順でローカル起動し検索が動作することを確認できる記述が揃う
+  - _Requirements: 5.6_
+  - _Boundary: docs/runbook.md_

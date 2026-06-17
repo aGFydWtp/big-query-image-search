@@ -76,7 +76,7 @@
   - _Boundary: ConnectionIam_
   - _Depends: 2.1, 2.3_
 
-- [ ] 3.2 Cloud Run サービスアカウントへ BigQuery/Vertex 権限を付与する
+- [x] 3.2 Cloud Run サービスアカウントへ BigQuery/Vertex 権限を付与する
   - `iam.tf` に、Run SA へ `roles/bigquery.jobUser` とデータ読取（dataset/プロジェクトの `roles/bigquery.dataViewer` 相当）をバインドする
   - Run SA へ `roles/aiplatform.user` をバインドする
   - 完了条件: `apply` 後に Run SA が BigQuery 実行/読取と aiplatform user を持つ

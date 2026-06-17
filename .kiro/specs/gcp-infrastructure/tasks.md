@@ -92,7 +92,7 @@
   - _Depends: 2.1, 2.2, 2.3, 2.4, 3.1_
 
 - [ ] 4. Validation: 構成・冪等・境界の検証
-- [ ] 4.1 静的検証と必須変数バリデーションを確認する
+- [x] 4.1 静的検証と必須変数バリデーションを確認する
   - `terraform validate` の成功を確認する
   - 必須変数を欠いた入力で `plan` がバリデーション失敗することを確認する
   - 全リソースのロケーションが単一 `region` から導出され一致することを確認する
@@ -123,3 +123,4 @@
 - 1.2: ロケーション導出は `terraform/locals.tf` の `local.location`（= var.region）に集約。下流ファイルは `var.region` / `var.image_bucket_name` を直接参照せず `local.location` / `local.image_bucket_name` を参照すること。
 - 1.2: state バケットは backend 部分設定で扱い `var.*` 化しない（Terraform 言語制約）。リージョン許可リストは `["us-central1"]`（gemini-embedding-2 は US マルチリージョン or us-central1 シングルリージョンのみ提供確認、設計はシングルリージョン前提）。
 - 1.2: Terraform RE2 では `{1,1024}` の大きい上限を持つ interval 量指定子が誤動作したため、`dataset_id` は `^[A-Za-z0-9_]+$` + 別途 `length()<=1024` で検証。
+- 4.1: backend.tf に `backend "gcs"` があると `terraform init -backend=false` 後でも `terraform plan` がバックエンドガードでブロックされる。変数/リージョンバリデーションを plan で検証するには一時的に `backend "local" {}` の override ファイルを置いて実行し、検証後に削除する（ソース .tf は無変更を維持）。`terraform validate` はバックエンド不要なので override 不要。

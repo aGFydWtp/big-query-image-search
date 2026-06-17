@@ -1,0 +1,22 @@
+# GCS リモート state バックエンドの部分設定（partial configuration）の雛形。
+#
+# 使い方:
+#   1. このファイルを backend.hcl にコピーする
+#        cp backend.hcl.example backend.hcl
+#   2. bucket / prefix を環境に合わせて編集する
+#   3. リモート state を初期化する
+#        terraform init -backend-config=backend.hcl
+#
+# 前提: ここで指定する state 用 GCS バケットは事前に存在している必要がある。
+#       このバケットは本ルートモジュールの管理対象外（chicken-and-egg 回避）であり、
+#       手動作成または別のブートストラップ用 Terraform 構成で払い出しておくこと。
+#       バケットには versioning を有効化しておくことを推奨（state 履歴の保全のため）。
+#
+# 注: GCS backend は state を自動でロックするため、複数実行者間での共有・ロックが
+#     満たされる。別途のロック機構（例: DynamoDB 相当）は不要。
+
+# state を保存する既存の GCS バケット名（gs:// プレフィックスは不要）
+bucket = "your-terraform-state-bucket"
+
+# バケット内で state を格納するパスのプレフィックス
+prefix = "gcp-infrastructure/state"

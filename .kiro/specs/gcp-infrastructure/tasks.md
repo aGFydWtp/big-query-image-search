@@ -17,7 +17,7 @@
   - _Requirements: 6.2, 6.4, 6.6_
   - _Boundary: RootModuleConfig_
 
-- [ ] 1.3 リモート state バックエンドを構成する
+- [x] 1.3 リモート state バックエンドを構成する
   - `backend.tf` に GCS リモートバックエンド（バケット + prefix）を設定する
   - 完了条件: `terraform init` でリモート state が初期化され、複数実行者間で共有・ロックされる
   - _Requirements: 6.3_

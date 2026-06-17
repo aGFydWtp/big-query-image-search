@@ -33,7 +33,7 @@
   - _Depends: 1.1, 1.2_
 
 - [ ] 2. Core: 基盤リソースの払い出し
-- [ ] 2.1 (P) 画像保管用 GCS バケットを定義する
+- [x] 2.1 (P) 画像保管用 GCS バケットを定義する
   - `storage.tf` に `google_storage_bucket` を `region` 由来 location で作成する
   - `uniform_bucket_level_access` と `public_access_prevention = enforced` で公開アクセスを抑止する
   - 既存バケットを破壊しない安全設定とする

@@ -42,7 +42,7 @@
   - _Boundary: ImageBucket_
   - _Depends: 1.4_
 
-- [ ] 2.2 (P) BigQuery dataset を定義する
+- [x] 2.2 (P) BigQuery dataset を定義する
   - `bigquery.tf` に `google_bigquery_dataset` を `region` 由来 location で作成する
   - 再 apply 時に既存テーブルを破壊しない設定とする
   - 完了条件: `apply` で dataset が作成され、再 apply で既存テーブルが破壊されない

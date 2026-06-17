@@ -102,6 +102,7 @@
   - _Depends: 1.2, 2.1, 2.2, 2.3_
 
 - [ ] 4.2 適用・冪等性とリソース作成を検証する
+  - _Blocked: manual apply required — 実 GCP への `terraform apply`（課金対象・ADC 必須・不可逆寄り）が必要。ユーザー方針により運用者が ADC 設定後に実施。初回 apply での全リソース作成と連続 apply の差分ゼロ冪等性を運用者が確認すること。_
   - 初回 `apply` で API・バケット・dataset・接続・両 SA・IAM・出力が作成されることを確認する
   - 連続 `apply` が冪等で差分ゼロになることを確認する
   - API が有効化された状態でリソース作成が成功する順序を確認する
@@ -117,6 +118,8 @@
   - 完了条件: 各 SA の権限・公開抑止・境界（DDL/サービス本体非作成）がすべて確認できる
   - _Requirements: 2.4, 4.4, 4.5, 5.2, 5.3, 4.6, 5.5_
   - _Depends: 3.1, 3.2_
+  - _Static-verified: 境界（リモートモデル DDL/Object Table/Cloud Run サービス本体が構成に含まれない 4.6/5.5）、公開抑止設定（`public_access_prevention=enforced`+`uniform_bucket_level_access=true` 2.4）、IAM バインド宣言（接続SA: storage.objectViewer+aiplatform.user / Run SA: bigquery.jobUser+dataset dataViewer+aiplatform.user 4.4/4.5/5.2/5.3）はコード上で確認済み。_
+  - _Blocked: manual apply required — SA が実際に権限を「持つ」こと・バケットが実際に公開不可であることの apply 後ライブ確認には `terraform apply`（課金対象・ADC 必須）が必要。ユーザー方針により運用者が実施。_
 
 ## Implementation Notes
 - 環境: terraform CLI は未インストールだったため `/Users/haruki/.local/bin/terraform`（v1.9.8）をローカル設置。GCP ADC は未設定のため `terraform apply` は実行不可（タスク4.2 と 4.3 のライブ apply 検証は明示承認＋ADC が必要）。
@@ -124,3 +127,4 @@
 - 1.2: state バケットは backend 部分設定で扱い `var.*` 化しない（Terraform 言語制約）。リージョン許可リストは `["us-central1"]`（gemini-embedding-2 は US マルチリージョン or us-central1 シングルリージョンのみ提供確認、設計はシングルリージョン前提）。
 - 1.2: Terraform RE2 では `{1,1024}` の大きい上限を持つ interval 量指定子が誤動作したため、`dataset_id` は `^[A-Za-z0-9_]+$` + 別途 `length()<=1024` で検証。
 - 4.1: backend.tf に `backend "gcs"` があると `terraform init -backend=false` 後でも `terraform plan` がバックエンドガードでブロックされる。変数/リージョンバリデーションを plan で検証するには一時的に `backend "local" {}` の override ファイルを置いて実行し、検証後に削除する（ソース .tf は無変更を維持）。`terraform validate` はバックエンド不要なので override 不要。
+- 4.2/4.3: この環境では terraform CLI 未インストール（→ `/Users/haruki/.local/bin/terraform` を設置）かつ GCP ADC 不在のため `terraform apply` 実行不可。apply 依存検証はユーザー方針により運用者へ委譲。運用者向け手順: (1) state 用 GCS バケットを事前作成、(2) `cp backend.hcl.example backend.hcl` で bucket/prefix を設定、(3) `cp terraform.tfvars.example terraform.tfvars` で project_id 等を設定、(4) `gcloud auth application-default login`、(5) `terraform init -backend-config=backend.hcl`、(6) `terraform apply`、(7) `terraform apply` 再実行で差分ゼロ確認、(8) `terraform output` で識別子確認、(9) `gcloud projects get-iam-policy` / バケット IAM で SA 権限・公開抑止を確認。

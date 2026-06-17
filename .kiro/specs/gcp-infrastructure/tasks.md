@@ -68,7 +68,7 @@
   - _Depends: 1.4_
 
 - [ ] 3. Integration: 最小権限 IAM のバインド
-- [ ] 3.1 接続サービスアカウントへ GCS/Vertex 権限を付与する
+- [x] 3.1 接続サービスアカウントへ GCS/Vertex 権限を付与する
   - `iam.tf` に、接続 SA へ画像バケットスコープの `roles/storage.objectViewer` をバインドする
   - 接続 SA へプロジェクトスコープの `roles/aiplatform.user` をバインドする
   - 完了条件: `apply` 後に接続 SA がバケット読取と aiplatform user を持つ

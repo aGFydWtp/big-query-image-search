@@ -15,14 +15,27 @@
 # NOTE: Cloud Run 実行 SA への IAM バインド（CloudRunIam, Requirement 5.2/5.3）は
 # 別タスクでこの iam.tf に追記される。本ブロックは接続 SA のバインドのみ。
 
+# 接続 SA 伝播待ち（コールドスタートでの単一 apply 成功のため）。
+# BigLake 接続（cloud_resource{}）の Google 管理 SA は、接続作成時に識別子は即時
+# 返るが、IAM プリンシパルとして参照可能になるまで数十秒の伝播遅延がある。これを
+# 待たずに後続の *_iam_member を作成すると "Service account ... does not exist" で
+# 失敗する（結果整合性）。接続作成後に固定時間待機し、接続 SA を参照する 2 つの
+# バインド（4.4 / 4.5）をこの待機に依存させることで、初回 apply での全リソース作成
+# を成立させる（Requirement 4.4/4.5、design "ConnectionIam"）。
+resource "time_sleep" "wait_connection_sa_propagation" {
+  depends_on      = [google_bigquery_connection.biglake]
+  create_duration = "90s"
+}
+
 # Requirement 4.4: 接続 SA へ画像保管バケットの読取権限。
 # バケットスコープの `roles/storage.objectViewer` をバケット単位でバインドする
 # ことで、最小権限（プロジェクト全体ではなく当該バケットのオブジェクト読取のみ）
 # を維持する。bucket は名前参照（google_storage_bucket.images.name）で渡す。
 resource "google_storage_bucket_iam_member" "connection_sa_image_object_viewer" {
-  bucket = google_storage_bucket.images.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${google_bigquery_connection.biglake.cloud_resource[0].service_account_id}"
+  bucket     = google_storage_bucket.images.name
+  role       = "roles/storage.objectViewer"
+  member     = "serviceAccount:${google_bigquery_connection.biglake.cloud_resource[0].service_account_id}"
+  depends_on = [time_sleep.wait_connection_sa_propagation]
 }
 
 # Requirement 4.5: 接続 SA へ Vertex AI（埋め込みモデル呼び出し）利用権限。
@@ -31,9 +44,10 @@ resource "google_storage_bucket_iam_member" "connection_sa_image_object_viewer" 
 # "ConnectionIam"（Risks）に従いプロジェクトスコープを許容する。付与ロールは
 # aiplatform.user に限定し、過剰な editor/owner 等は付与しない。
 resource "google_project_iam_member" "connection_sa_aiplatform_user" {
-  project = var.project_id
-  role    = "roles/aiplatform.user"
-  member  = "serviceAccount:${google_bigquery_connection.biglake.cloud_resource[0].service_account_id}"
+  project    = var.project_id
+  role       = "roles/aiplatform.user"
+  member     = "serviceAccount:${google_bigquery_connection.biglake.cloud_resource[0].service_account_id}"
+  depends_on = [time_sleep.wait_connection_sa_propagation]
 }
 
 # Cloud Run 実行 SA への最小権限 IAM バインド（design "CloudRunIam"、Requirement 5.2/5.3）。

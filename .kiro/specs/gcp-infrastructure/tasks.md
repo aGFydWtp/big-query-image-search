@@ -101,8 +101,8 @@
   - _Boundary: RootModuleConfig_
   - _Depends: 1.2, 2.1, 2.2, 2.3_
 
-- [ ] 4.2 適用・冪等性とリソース作成を検証する
-  - _Blocked: manual apply required — 実 GCP への `terraform apply`（課金対象・ADC 必須・不可逆寄り）が必要。ユーザー方針により運用者が ADC 設定後に実施。初回 apply での全リソース作成と連続 apply の差分ゼロ冪等性を運用者が確認すること。_
+- [x] 4.2 適用・冪等性とリソース作成を検証する
+  - _Verified (2026-06-19, project image-search-6c457e): `terraform apply` で全17リソース（API/バケット/dataset/接続/両SA/IAM/出力）作成、後続 `terraform plan` が "No changes"（差分ゼロ冪等性）を確認。初回コールドスタートでは接続SAの IAM 伝播遅延で接続SAバインド2件が "does not exist" で失敗したため、`time_sleep`（90s, iam.tf）を追加し単一 apply での全リソース作成を成立させた。_
   - 初回 `apply` で API・バケット・dataset・接続・両 SA・IAM・出力が作成されることを確認する
   - 連続 `apply` が冪等で差分ゼロになることを確認する
   - API が有効化された状態でリソース作成が成功する順序を確認する
@@ -110,7 +110,7 @@
   - _Requirements: 1.3, 1.4, 6.5_
   - _Depends: 3.1, 3.2, 3.3_
 
-- [ ] 4.3 IAM・公開アクセス・境界を検証する
+- [x] 4.3 IAM・公開アクセス・境界を検証する
   - 接続 SA がバケット読取と aiplatform user を持つことを確認する
   - Cloud Run SA が BigQuery 実行/読取と aiplatform user を持つことを確認する
   - バケットが公開アクセス不可であることを確認する
@@ -118,8 +118,11 @@
   - 完了条件: 各 SA の権限・公開抑止・境界（DDL/サービス本体非作成）がすべて確認できる
   - _Requirements: 2.4, 4.4, 4.5, 5.2, 5.3, 4.6, 5.5_
   - _Depends: 3.1, 3.2_
-  - _Static-verified: 境界（リモートモデル DDL/Object Table/Cloud Run サービス本体が構成に含まれない 4.6/5.5）、公開抑止設定（`public_access_prevention=enforced`+`uniform_bucket_level_access=true` 2.4）、IAM バインド宣言（接続SA: storage.objectViewer+aiplatform.user / Run SA: bigquery.jobUser+dataset dataViewer+aiplatform.user 4.4/4.5/5.2/5.3）はコード上で確認済み。_
-  - _Blocked: manual apply required — SA が実際に権限を「持つ」こと・バケットが実際に公開不可であることの apply 後ライブ確認には `terraform apply`（課金対象・ADC 必須）が必要。ユーザー方針により運用者が実施。_
+  - _Verified (2026-06-19, project image-search-6c457e, gcloud ライブ確認):_
+    - _接続SA: `gcloud storage buckets get-iam-policy` で `roles/storage.objectViewer`、`gcloud projects get-iam-policy` で `roles/aiplatform.user` を保持（4.4/4.5）。_
+    - _Run SA: project IAM で `roles/bigquery.jobUser`+`roles/aiplatform.user`、`bq show` で dataset `READER`(=dataViewer 相当) を保持（5.2/5.3）。_
+    - _公開抑止: `gcloud storage buckets describe` で `public_access_prevention=enforced`（2.4）。_
+    - _境界: `gcloud run services list` が空＝Cloud Run サービス本体なし。構成にリモートモデル DDL/Object Table もなし（4.6/5.5）。_
 
 ## Implementation Notes
 - 環境: terraform CLI は未インストールだったため `/Users/haruki/.local/bin/terraform`（v1.9.8）をローカル設置。GCP ADC は未設定のため `terraform apply` は実行不可（タスク4.2 と 4.3 のライブ apply 検証は明示承認＋ADC が必要）。
@@ -128,3 +131,4 @@
 - 1.2: Terraform RE2 では `{1,1024}` の大きい上限を持つ interval 量指定子が誤動作したため、`dataset_id` は `^[A-Za-z0-9_]+$` + 別途 `length()<=1024` で検証。
 - 4.1: backend.tf に `backend "gcs"` があると `terraform init -backend=false` 後でも `terraform plan` がバックエンドガードでブロックされる。変数/リージョンバリデーションを plan で検証するには一時的に `backend "local" {}` の override ファイルを置いて実行し、検証後に削除する（ソース .tf は無変更を維持）。`terraform validate` はバックエンド不要なので override 不要。
 - 4.2/4.3: この環境では terraform CLI 未インストール（→ `/Users/haruki/.local/bin/terraform` を設置）かつ GCP ADC 不在のため `terraform apply` 実行不可。apply 依存検証はユーザー方針により運用者へ委譲。運用者向け手順: (1) state 用 GCS バケットを事前作成、(2) `cp backend.hcl.example backend.hcl` で bucket/prefix を設定、(3) `cp terraform.tfvars.example terraform.tfvars` で project_id 等を設定、(4) `gcloud auth application-default login`、(5) `terraform init -backend-config=backend.hcl`、(6) `terraform apply`、(7) `terraform apply` 再実行で差分ゼロ確認、(8) `terraform output` で識別子確認、(9) `gcloud projects get-iam-policy` / バケット IAM で SA 権限・公開抑止を確認。
+- 4.2/4.3 完了 (2026-06-19): ユーザー承認のもと project `image-search-6c457e`（region us-central1）へ実 apply を実施し 4.2/4.3 を充足。state バケット `image-search-6c457e-tfstate` は既存。**重要な知見**: BigLake 接続（`cloud_resource{}`）の Google 管理 SA（`bqcx-*@gcp-sa-bigquery-condel.iam.gserviceaccount.com`）は識別子が即時返るが IAM プリンシパルとして参照可能になるまで数十秒の伝播遅延があり、同一 apply 内で接続SAへの `*_iam_member` を作ると "Service account ... does not exist" で失敗する。対処として `hashicorp/time` プロバイダ（versions.tf）＋ `time_sleep.wait_connection_sa_propagation`（90s, iam.tf）を接続作成と接続SAバインドの間に挿入し、接続SAを参照する2バインドを `depends_on` で待機に従属させた。これで冪等性は維持（待機後の plan は差分ゼロ）。Cloud Run SA など通常の `google_service_account` にはこの遅延はなく待機不要。

@@ -140,3 +140,27 @@ design の File Structure（handler/validation/search_query/bigquery_client/resu
 1. **Generalization**: 検索は単一能力（`Search(query, top_k, signed_url) → results`）。署名 URL は任意アドオンで、インターフェースにフラグを設けるのみ（実装は要求分に限定）。過度な一般化はしない。
 2. **Build vs. Adopt**: 埋め込み生成は **BigQuery ネイティブ（AI.GENERATE_EMBEDDING）を採用**し専用 Vertex 呼出サービスを作らない（roadmap 決定と一致）。署名 URL は **Go SDK の `SignedURL`+`SignBytes`（IAM signBlob）を採用**しキー管理を排除。HTTP は**標準 `net/http` を採用**し Gin/Echo 等は不採用（依存最小・KISS）。
 3. **Simplification**: パッケージは責務単位で凝集（config / httpapi / validation / search / result / signedurl）。`server` と `handler` は `httpapi` パッケージ内に同居させ過分割を避ける。インターフェースは単一実装には付けない（YAGNI）。
+
+# 実装フェーズ: Task 2.2 dry-run ゲート実機結果（2026-06-19, `/kiro-impl` 実行）
+
+GO 前ゲート（design「残 dry-run 項目」(a)(b)）の実機検証を実施。対象は上流実プロジェクト `image-search-6c457e`（dataset `image_search`、location `us-central1`）。
+
+## 実機環境の状態（実測）
+
+- `bq` 認証復帰後、`SELECT 1` の dry-run が成功（BigQuery 到達性 OK）。
+- dataset `image_search`（location=`us-central1`）と BigLake 接続 `image-search-biglake`（CLOUD_RESOURCE）は**存在**。region 整合（Requirement 5.5）を実測確認。
+- リモートモデル `gemini_embedding_model` と テーブル `image_embeddings` は **未デプロイ**（`bq show` が `Not found: Model …gemini_embedding_model` / `Not found: Table …image_embeddings`）。`image-ingestion-pipeline` の SQL 資産はリポジトリに存在するが、本実プロジェクトへは未実行。
+
+## dry-run 実行結果
+
+設計の確定テンプレート（`sql/search.sql` と同形）を実環境識別子（`image-search-6c457e.image_search.{gemini_embedding_model,image_embeddings}`）でレンダリングし、`@query:STRING`/`@top_k:INT64` をバインドして `--dry_run`（`--location=us-central1`）実行。
+
+- **採用するテンプレ形 = 単一クエリ（CTE 結合）**（既定）。下記の根拠により縮退案（2 ジョブ分割）は不採用。
+- **(a) `top_k => @top_k` 名前付き引数への BQ パラメータ束縛**: **構文受理（肯定シグナル）**。BigQuery はクエリ全体（`AI.GENERATE_EMBEDDING(MODEL …, (SELECT @query AS content), STRUCT(3072 AS output_dimensionality))` → `VECTOR_SEARCH(…, top_k => @top_k, distance_type => 'COSINE')`）をパース・解析フェーズまで通過し、**名前付き引数 `top_k =>` に対する `@top_k` 束縛で構文/解析エラーを出さなかった**。エラーは後段の名前解決で発生（下記）。名前付き引数束縛が不可なら解析段でエラーになるため、これは束縛可の肯定根拠。よって検証済み整数のテンプレ埋め込みフォールバックは不要。
+- **(b) Preview モデルを含む単一クエリチェーンの dry-run 成否**: **完全確認は保留（上流未デプロイにより実行不能）**。実エラーは `Not found: Table image-search-6c457e:image_search.image_embeddings was not found in location us-central1`。すなわち**ブロッカーはクエリ形ではなく上流 ingestion の未デプロイ**（モデル・テーブル不在）。モデル参照自体の最終解決は、テーブル/モデル作成後に同 dry-run を再実行して確認する。
+
+## 確定方針と手動ゲート
+
+- **後続のクエリ組立て方針は一意に確定**: SearchQueryBuilder（Task 2.3）は **単一クエリ（CTE 結合）テンプレートを既定**として実装する。`top_k => @top_k` を BQ パラメータ束縛で用いる（(a) 構文受理済み）。
+- **縮退案（2 ジョブ分割）はテンプレ実装としては保持**（design 方針どおり切替可能に）が、現時点で採用条件（dry-run(b) のチェーン失敗）は観測されていない。
+- **手動ゲート（本番 GO 前・必須）**: `image-ingestion-pipeline` のモデル/テーブル・デプロイ後に、上記 dry-run（`docs/runbook.md` の「Task 2.2 dry-run ゲート」節）を再実行し、Preview モデル `gemini_embedding_model` を含む単一クエリチェーンが dry-run 成功することを確認する。失敗時のみ縮退案へ切替える。

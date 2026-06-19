@@ -110,3 +110,41 @@ envsubst < sql/validate.sql | bq query --use_legacy_sql=false --project_id="$PRO
 > **未実施・運用者確認事項**: 本リポジトリ確定時点で取込バケットに画像が無いため、実画像での
 > `generate_embeddings.sql` 通し実行（実次元 3072・`status` 挙動の実データ確認）は未実施。
 > 画像投入後、上記「実行順序」を一巡し `validate.sql` で全項目を確認すること。
+
+---
+
+## image-search-api: Task 2.2 dry-run ゲート（GO 前・手動再実行）
+
+検索クエリ（クエリ埋め込み + `VECTOR_SEARCH` 単一クエリ）の本番 GO 前ゲート。`image-search-api` 設計の「残 dry-run 項目」(a)(b) を実機確認する。
+
+**前提**: `image-ingestion-pipeline` のリモートモデル `gemini_embedding_model` と テーブル `image_embeddings` がデプロイ済みであること（未デプロイだと dry-run はテーブル/モデル未検出で失敗する）。
+
+```bash
+# 値は上流 terraform output / sql/params.env から注入（ハードコード禁止）
+#   PROJECT_ID=image-search-6c457e  DATASET=image_search  REGION=us-central1
+bq query --project_id="$PROJECT_ID" --use_legacy_sql=false --dry_run \
+  --location="$REGION" \
+  --parameter='query:STRING:cat' --parameter='top_k:INT64:10' <<SQL
+WITH query_embedding AS (
+  SELECT embedding
+  FROM AI.GENERATE_EMBEDDING(
+    MODEL \`${PROJECT_ID}.${DATASET}.gemini_embedding_model\`,
+    (SELECT @query AS content),
+    STRUCT(3072 AS output_dimensionality)
+  )
+  WHERE status = ''
+)
+SELECT base.image_uri AS image_uri, base.content_type AS content_type, distance
+FROM VECTOR_SEARCH(
+  TABLE \`${PROJECT_ID}.${DATASET}.image_embeddings\`,
+  'embedding', TABLE query_embedding,
+  query_column_to_search => 'embedding',
+  top_k => @top_k, distance_type => 'COSINE'
+)
+ORDER BY distance ASC;
+SQL
+```
+
+- **成功** (`Query successfully validated`): 単一クエリ（CTE 結合）形を確定採用（既定）。`SearchQueryBuilder` の既定テンプレートのまま本番可。
+- **失敗** がチェーン/Preview モデル制約に起因する場合のみ: 設計の縮退案（2 ジョブ分割: 埋め込み生成 → `@query_embedding` を `VECTOR_SEARCH` に渡す）へ切替える。
+- 2026-06-19 実装時点の実機結果: `(a) top_k => @top_k` 束縛は構文受理（肯定）。`(b)` は上流モデル/テーブル未デプロイのためテーブル未検出で停止 → 完全確認はデプロイ後に本手順で再実行（詳細は `research.md`「Task 2.2 dry-run ゲート実機結果」）。

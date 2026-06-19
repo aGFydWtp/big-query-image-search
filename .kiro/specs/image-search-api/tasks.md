@@ -20,7 +20,7 @@
   - _Requirements: 1.3, 4.1, 4.2_
   - _Boundary: InputValidation_
   - _Depends: 1.1_
-- [ ] 2.2 BigQuery 単一クエリ dry-run ゲート（先行検証）
+- [x] 2.2 BigQuery 単一クエリ dry-run ゲート（先行検証）
   - 実機 BigQuery dry-run で (a) `@top_k` の `top_k =>` 名前付き引数束縛可否、(b) Preview モデル `gemini_embedding_model` を含む単一クエリチェーン（`AI.GENERATE_EMBEDDING` → `VECTOR_SEARCH`）の dry-run 成否を確認する
   - 結果で後続 SearchQueryBuilder の確定形を決める: (a) 束縛不可なら検証済み整数のテンプレ埋め込みへ、(b) 単一クエリ失敗時は 2 ジョブ分割（埋め込み生成 → `@query_embedding` を `VECTOR_SEARCH` へ渡す）の縮退案を採用する
   - 観測可能な完了条件: dry-run 実行結果（各項目の成否・採用するテンプレ形）を research.md/runbook に記録し、後続のクエリ組立て方針が一意に確定する
@@ -84,3 +84,9 @@
   - 観測可能な完了条件: 上流起票が記録され、追補適用後に署名 URL の実機発行を確認できる（未追補時は部分失敗パスでコア検索が 200 を返すことを確認できる）
   - _Requirements: 3.2, 3.3, 5.4_
   - _Depends: 3.3, 5.1_
+
+## Implementation Notes
+
+- 環境: Go ツールチェーン未導入だったため `brew install go`（go1.26.4）を実行して実装を開始した。検証コマンドは `go build ./...` / `go test ./...` / `go vet ./...`。
+- 共有契約の `${MODEL}` 注入値はモデル**オブジェクト名 `gemini_embedding_model`**（エンドポイント名 `gemini-embedding-2-preview` ではない）。Config の MODEL 既定値もオブジェクト名に固定済み。requirements.md 2.1/5.2 に残る旧エンドポイント名表記は design の上書き（G2 ノート）で吸収済みのため誤注入しないこと。
+- Task 2.2: 実機 BigQuery dry-run は実プロジェクト `image-search-6c457e`（dataset `image_search`, us-central1）で実施。dataset/接続は存在するが上流 ingestion の**モデル `gemini_embedding_model`・テーブル `image_embeddings` が未デプロイ**。単一クエリ形を既定採用（dry-run(a) の `top_k => @top_k` 束縛は構文受理）。dry-run(b) の Preview モデルチェーン完全確認は上流デプロイ後の手動ゲート（`docs/runbook.md`「Task 2.2 dry-run ゲート」/ `research.md`）に隔離。下流 2.3 はこの既定で進行可。

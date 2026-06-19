@@ -7,3 +7,7 @@ crash.log
 backend.hcl
 !backend.hcl.example
 .terraform.lock.hcl
+
+# image-ingestion-pipeline: 実環境パラメータ（params.example をコピーして作成）
+sql/params
+sql/params.env

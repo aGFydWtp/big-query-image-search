@@ -1,0 +1,42 @@
+# image-ingestion-pipeline 環境パラメータ（テンプレート）
+#
+# 使い方:
+#   1. 本ファイルを `sql/params.env` にコピーする（params.env は .gitignore 済み）。
+#        cp sql/params.example sql/params.env
+#   2. 下記の値を上流 gcp-infrastructure の `terraform output` から導出して書き換える。
+#   3. 各 SQL 実行前に値を注入する（runbook.md 参照）。注入は envsubst を推奨:
+#        set -a && . sql/params.env && set +a
+#        envsubst < sql/object_table.sql | bq query --use_legacy_sql=false --project_id="$PROJECT_ID"
+#
+# プレースホルダ規約: 全 SQL は環境依存値を `${VAR}` 形式で参照し、ハードコードしない。
+# 使用変数: ${PROJECT_ID} ${DATASET_ID} ${CONNECTION_ID} ${REGION} ${BUCKET_URI}
+#
+# ---- 上流 terraform output からの導出 ----------------------------------------
+#   terraform -chdir=terraform output -raw bigquery_dataset_id
+#       => 例: my-project.image_search        （形式: project_id.dataset_id）
+#   terraform -chdir=terraform output -raw bigquery_connection_id
+#       => 例: projects/123456789/locations/us-central1/connections/image-search-biglake
+#   terraform -chdir=terraform output -raw image_bucket_name
+#       => 例: my-project-imgsearch-images    （バケット名のみ。URI ではない）
+# -----------------------------------------------------------------------------
+
+# プロジェクト ID。DATASET_ID（project.dataset）の '.' 左側を抽出した値。
+# bq 実行時の --project_id にも使用する。
+export PROJECT_ID="my-project"
+
+# データセットの完全修飾名（project_id.dataset_id）。
+# 上流出力 bigquery_dataset_id をそのまま使用。テーブル/モデルの修飾に用いる。
+export DATASET_ID="my-project.image_search"
+
+# BigLake 接続の完全修飾パス（cloud_resource 型）。
+# 上流出力 bigquery_connection_id をそのまま使用。WITH CONNECTION に用いる。
+export CONNECTION_ID="projects/123456789/locations/us-central1/connections/image-search-biglake"
+
+# 単一リージョン。CONNECTION_ID の locations/ セグメントと、DATASET_ID の実ロケーションが
+# 一致することを必ず確認する（dataset・接続・モデル・テーブルを単一 region に統一する基準）。
+# モデル gemini-embedding-2-preview の us-central1 提供は実機確認済み（Task 0）。
+export REGION="us-central1"
+
+# 画像バケット URI。image_bucket_name に gs:// を付与して導出する（末尾の / は付けない）。
+# Object Table の uris にはワイルドカード（${BUCKET_URI}/*）を付与する。
+export BUCKET_URI="gs://my-project-imgsearch-images"

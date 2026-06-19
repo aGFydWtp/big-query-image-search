@@ -48,7 +48,7 @@
   - _Requirements: 1.4, 3.1, 3.4, 3.5, 4.4_
   - _Boundary: ResultFormatter_
   - _Depends: 3.1_
-- [ ] 3.3 GCS 署名付き URL 生成（SignedUrlGenerator）の実装 (P)
+- [x] 3.3 GCS 署名付き URL 生成（SignedUrlGenerator）の実装 (P)
   - 要求時（`signed_url=true`）のみ、keyless V4 署名（`GoogleAccessID`=実行 SA メール、`SignBytes`=IAM `signBlob` 呼出、秘密鍵不使用）で images バケットオブジェクトへ有効期限付き URL を発行
   - 個別の署名失敗は当該項目で URL 省略/障害明示にとどめ、他結果返却を妨げない
   - 観測可能な完了条件: `SignBytes` をモック化し、成功時に有効期限付き V4 URL を生成し、**失敗注入時も他結果（`image_uri`・`score`）が 200 で返る部分失敗テストが通る**

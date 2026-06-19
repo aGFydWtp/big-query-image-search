@@ -1,0 +1,78 @@
+# Cloud Run (Knative) service definition for image-search-api.
+#
+# This file contains ONLY placeholders for environment-specific values. Replace
+# the *_PLACEHOLDER tokens at deploy time with values sourced from the upstream
+# gcp-infrastructure `terraform output` (and the container image you build/push).
+# Do NOT commit real project ids, bucket names, dataset ids, or SA emails here.
+#
+# Provenance of placeholders (see .kiro/specs/image-search-api/design.md
+# "Allowed Dependencies"):
+#   RUN_SA_EMAIL  <- gcp-infrastructure output cloud_run_service_account_email
+#   PROJECT_ID    <- GCP project id (deployment target)
+#   DATASET_ID    <- gcp-infrastructure output bigquery_dataset_id (project-qualified)
+#   IMAGE_BUCKET  <- gcp-infrastructure output image_bucket_name
+#   REGION        <- fixed value us-central1 (gcp-infrastructure input variable;
+#                    no terraform output exists for region)
+#   EMBEDDINGS_TABLE <- shared contract from image-ingestion-pipeline (image_embeddings)
+#   MODEL         <- remote model OBJECT name gemini_embedding_model
+#                    (NOT the endpoint name gemini-embedding-2-preview)
+#
+# Minimal privilege: the service assigns only the upstream-provisioned runtime
+# service account. No IAM is granted here; required roles are owned and granted
+# by gcp-infrastructure (BigQuery jobUser/dataViewer, aiplatform.user, plus the
+# signed-URL prerequisites tokenCreator/objectViewer).
+#
+# Deploy with:
+#   gcloud run services replace deploy/service.yaml --region us-central1
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: image-search-api
+spec:
+  template:
+    metadata:
+      annotations:
+        # Stateless: scale to zero when idle. Adjust as needed at deploy time.
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+    spec:
+      # Upstream-provisioned Cloud Run runtime service account (minimal privilege).
+      serviceAccountName: RUN_SA_EMAIL_PLACEHOLDER
+      containers:
+        # Replace with the pushed container image reference at deploy time, e.g.
+        # REGION-docker.pkg.dev/PROJECT_ID/REPO/image-search-api:TAG
+        - image: IMAGE_REF_PLACEHOLDER
+          ports:
+            # Cloud Run injects PORT and routes to this container port. 8080
+            # matches the server's local default (cmd/server/main.go).
+            - name: http1
+              containerPort: 8080
+          env:
+            # All values are environment-specific and injected here; nothing is
+            # hardcoded in the application image.
+            - name: PROJECT_ID
+              value: PROJECT_ID_PLACEHOLDER
+            # REGION is the fixed single-region value us-central1.
+            - name: REGION
+              value: us-central1
+            - name: DATASET_ID
+              value: DATASET_ID_PLACEHOLDER
+            - name: EMBEDDINGS_TABLE
+              value: image_embeddings
+            # MODEL is the remote model OBJECT name (gemini_embedding_model), NOT
+            # the endpoint name gemini-embedding-2-preview.
+            - name: MODEL
+              value: gemini_embedding_model
+            - name: IMAGE_BUCKET
+              value: IMAGE_BUCKET_PLACEHOLDER
+            # RUN_SA_EMAIL must match serviceAccountName above; used as the
+            # GoogleAccessID for keyless V4 signed URLs (IAM signBlob).
+            - name: RUN_SA_EMAIL
+              value: RUN_SA_EMAIL_PLACEHOLDER
+            # Optional; defaults to 15m in the application if unset.
+            - name: SIGNED_URL_EXPIRY
+              value: 15m
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi

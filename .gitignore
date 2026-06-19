@@ -11,3 +11,7 @@ backend.hcl
 # image-ingestion-pipeline: 実環境パラメータ（params.example をコピーして作成）
 sql/params
 sql/params.env
+
+# image-search-api: Go ビルド成果物（ローカルビルドの混入防止）
+/server
+cmd/server/server

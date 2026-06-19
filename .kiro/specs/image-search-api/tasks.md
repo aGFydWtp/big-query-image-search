@@ -65,7 +65,7 @@
   - _Depends: 2.1, 2.3, 3.1, 3.2, 3.3_
 
 - [ ] 5. Cloud Run デプロイ構成と運用手順
-- [ ] 5.1 コンテナと Cloud Run サービス定義の作成 (P)
+- [x] 5.1 コンテナと Cloud Run サービス定義の作成 (P)
   - `deploy/Dockerfile`（マルチステージ Go ビルド）と `deploy/service.yaml`（実行 SA 割当・環境変数・ポート `$PORT`・リソース）を用意し、ステートレス・最小権限・region 整合で動作させる
   - `deploy/.env.example` に必須環境変数を網羅し、`REGION=us-central1`・`MODEL=gemini_embedding_model`（オブジェクト名）を明記する
   - 観測可能な完了条件: サービス定義が上流払い出しの実行 SA と必須環境変数を参照し、ハードコードがないことを確認できる

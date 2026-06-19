@@ -1,0 +1,20 @@
+# Keep the Docker build context minimal and avoid leaking local/dev artifacts
+# into the image. The Dockerfile only needs Go sources + go.mod/go.sum.
+.git
+.gitignore
+.dockerignore
+
+# Local environment / secrets (never copy into the image).
+.env
+*.env
+!deploy/.env.example
+
+# Build outputs and editor cruft.
+/tmp
+*.out
+*.test
+
+# Spec / steering / docs are not needed at build time.
+.kiro
+.claude
+docs

@@ -35,7 +35,7 @@
   - _Depends: 2.2_
 
 - [ ] 3. BigQuery 実行と結果整形層の実装
-- [ ] 3.1 BigQuery クライアント（BigQueryClient）の実装
+- [x] 3.1 BigQuery クライアント（BigQueryClient）の実装
   - パラメータ化クエリを実行し行を返す。既定は単一ジョブ、2.2 が縮退採用の場合は埋め込み生成 → `@query_embedding` を渡す 2 ジョブ実行へ切替える
   - タイムアウト/クエリエラーを内部エラー型へ変換し詳細をクライアントへ漏洩させない、`context.Context` でタイムアウト/キャンセルを伝播
   - 観測可能な完了条件: 成功時に行を返し、失敗時に内部エラー型へ変換することを確認するテストが通る
@@ -90,3 +90,4 @@
 - 環境: Go ツールチェーン未導入だったため `brew install go`（go1.26.4）を実行して実装を開始した。検証コマンドは `go build ./...` / `go test ./...` / `go vet ./...`。
 - 共有契約の `${MODEL}` 注入値はモデル**オブジェクト名 `gemini_embedding_model`**（エンドポイント名 `gemini-embedding-2-preview` ではない）。Config の MODEL 既定値もオブジェクト名に固定済み。requirements.md 2.1/5.2 に残る旧エンドポイント名表記は design の上書き（G2 ノート）で吸収済みのため誤注入しないこと。
 - Task 2.2: 実機 BigQuery dry-run は実プロジェクト `image-search-6c457e`（dataset `image_search`, us-central1）で実施。dataset/接続は存在するが上流 ingestion の**モデル `gemini_embedding_model`・テーブル `image_embeddings` が未デプロイ**。単一クエリ形を既定採用（dry-run(a) の `top_k => @top_k` 束縛は構文受理）。dry-run(b) の Preview モデルチェーン完全確認は上流デプロイ後の手動ゲート（`docs/runbook.md`「Task 2.2 dry-run ゲート」/ `research.md`）に隔離。下流 2.3 はこの既定で進行可。
+- Task 3.1: BigQueryClient はテスト容易性のため `queryRunner` インターフェースのシームを持ち（本番は実 `*bigquery.Client`、単体テストは fake 注入）、内部エラー型 `ErrBigQuery`/`ErrQueryTimeout` で生エラー詳細を `Error()` から遮断（`Cause()` でサーバ側ログのみ取得）。縮退（2 ジョブ分割）パスは未配線・未採用で `embeddingVector` が nil 返しのフック。**将来 2 ジョブ分割を採用する独立タスク**では、(1) `embeddingVector` の埋め込み抽出を実装し、(2) それまではシームで明示エラーを返すよう（nil 束縛での暗黙失敗回避）ハードニングすること。

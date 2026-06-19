@@ -148,3 +148,116 @@ SQL
 - **成功** (`Query successfully validated`): 単一クエリ（CTE 結合）形を確定採用（既定）。`SearchQueryBuilder` の既定テンプレートのまま本番可。
 - **失敗** がチェーン/Preview モデル制約に起因する場合のみ: 設計の縮退案（2 ジョブ分割: 埋め込み生成 → `@query_embedding` を `VECTOR_SEARCH` に渡す）へ切替える。
 - 2026-06-19 実装時点の実機結果: `(a) top_k => @top_k` 束縛は構文受理（肯定）。`(b)` は上流モデル/テーブル未デプロイのためテーブル未検出で停止 → 完全確認はデプロイ後に本手順で再実行（詳細は `research.md`「Task 2.2 dry-run ゲート実機結果」）。
+
+## image-search-api: ビルド・デプロイ・ローカル起動/検証（5.6）
+
+`image-search-api` は `cmd/server`（標準 `net/http`）の単一ステートレスサービス。エンドポイントは `POST /search` と `GET /healthz`。設定は全て環境変数から注入し、コードへハードコードしない。本番 GO 前には上記「Task 2.2 dry-run ゲート」を必ず通すこと（検索 SQL の単一クエリ形を実機確認する前提ゲート）。
+
+### 必須環境変数
+
+`deploy/.env.example` を単一の参照集合とする。全値は環境依存でありコードに焼き込まない（`internal/config` が起動時に必須値をフェイルファスト検証）。
+
+| 変数 | 必須 | 由来 / 値 |
+|------|------|-----------|
+| `PROJECT_ID`       | 必須 | デプロイ先 GCP プロジェクト id |
+| `REGION`           | 必須 | 固定単一リージョン `us-central1`（`gcp-infrastructure` 入力変数由来。region の terraform 出力は無い）。BigQuery ジョブロケーションに使用 |
+| `DATASET_ID`       | 必須 | `gcp-infrastructure` output `bigquery_dataset_id`（`project.dataset` 形式） |
+| `EMBEDDINGS_TABLE` | 必須 | `image-ingestion-pipeline` 共有契約のテーブル名 `image_embeddings` |
+| `IMAGE_BUCKET`     | 必須 | `gcp-infrastructure` output `image_bucket_name`（署名 URL 対象バケット） |
+| `RUN_SA_EMAIL`     | 必須 | `gcp-infrastructure` output `cloud_run_service_account_email`。署名 URL の `GoogleAccessID` も兼ねる |
+| `MODEL`            | 任意 | リモートモデル**オブジェクト名** `gemini_embedding_model`（**エンドポイント名 `gemini-embedding-2-preview` ではない**）。未設定時はコード既定 `gemini_embedding_model` |
+| `SIGNED_URL_EXPIRY`| 任意 | 署名 URL 有効期限（Go duration、例 `15m`）。未設定時は既定 `15m` |
+| `PORT`             | 任意 | Cloud Run が実行時注入。ローカルは既定 `8080`。`deploy/service.yaml` には設定しない |
+
+> 表記揺れ防止（G2）: `MODEL` は必ずオブジェクト名 `gemini_embedding_model` を注入する。ingestion 側で作成したモデルオブジェクトと同一でなければ検索 SQL の `MODEL` 参照が解決できない。
+
+### ローカル起動 / 検証手順
+
+1. テンプレートをコピーして実値を記入（`.env.local` はコミットしない）:
+
+   ```bash
+   cp deploy/.env.example deploy/.env.local
+   # deploy/.env.local を編集し、terraform output 由来の実値を設定:
+   #   PROJECT_ID / DATASET_ID / IMAGE_BUCKET / RUN_SA_EMAIL は上流 output から
+   #   REGION=us-central1（固定） EMBEDDINGS_TABLE=image_embeddings MODEL=gemini_embedding_model
+   ```
+
+2. ビルドして環境変数を注入し起動する:
+
+   ```bash
+   go build ./cmd/server                         # コンパイル確認
+   set -a && . deploy/.env.local && set +a        # 環境変数を読み込み
+   PORT=8080 go run ./cmd/server                  # 8080 で待受
+   ```
+
+3. ヘルスチェック（ライブ BigQuery 不要・常に 200）:
+
+   ```bash
+   curl -i localhost:8080/healthz
+   # => HTTP/1.1 200 OK
+   ```
+
+4. サンプル検索（成功時の 200 レスポンス形）:
+
+   ```bash
+   curl -s -X POST localhost:8080/search \
+     -H 'Content-Type: application/json' \
+     -d '{"query":"cat","top_k":5}'
+   # 期待する 200 ボディ形:
+   # {"results":[{"image_uri":"gs://.../001.jpg","score":0.87,"content_type":"image/jpeg"}]}
+   # signed_url:true を付けた場合のみ各結果に "signed_url" が付加されうる（下記 IAM 前提参照）
+   ```
+
+5. 入力検証パス（ライブ BigQuery 不要・400 を返す）:
+
+   ```bash
+   curl -s -X POST localhost:8080/search -d '{"query":""}'
+   # => {"error":{"code":"invalid_request","message":"..."}}
+   ```
+
+> **実データの前提**: `/healthz` と空クエリ等の 400 検証パスは上流リソース無しでも動作する（BigQuery を呼ばない）。実際の検索結果を得るには上流の リモートモデル `gemini_embedding_model` と テーブル `image_embeddings` がデプロイ済みである必要がある。未デプロイ時は BigQuery がエラーを返し、ハンドラはそれを 5xx（`{"error":{"code":"internal_error",...}}`）にマップする（内部詳細は非漏洩）。本番投入前は上記「Task 2.2 dry-run ゲート」で検索 SQL を実機確認すること。
+
+### ビルド / デプロイ
+
+ビルドコンテキストはリポジトリルート。イメージはマルチステージ（distroless static・非 root）で `./cmd/server` を静的ビルドする（`deploy/Dockerfile`）。環境固有値はイメージに焼き込まず、全て実行時に環境変数で注入する。
+
+```bash
+# 変数はシェル/上流 terraform output から注入（実値はハードコードしない）
+REGION=us-central1
+PROJECT_ID="$(terraform -chdir=terraform output -raw bigquery_dataset_id | cut -d. -f1)"  # 例
+REPO=image-search                 # Artifact Registry リポジトリ名
+TAG="$(git rev-parse --short HEAD)"
+IMAGE_REF="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/image-search-api:${TAG}"
+
+# 1) ビルド（-f でルートをコンテキストに）
+docker build -f deploy/Dockerfile -t "$IMAGE_REF" .
+
+# 2) Artifact Registry へ push（事前に `gcloud auth configure-docker ${REGION}-docker.pkg.dev`）
+docker push "$IMAGE_REF"
+```
+
+デプロイは `deploy/service.yaml`（Knative Service 定義・`*_PLACEHOLDER` のみ）のプレースホルダを実値へ置換して反映する。`serviceAccountName` には上流 provisioned の Run SA（`RUN_SA_EMAIL`）を割り当てる（最小権限）。
+
+```bash
+# 上流 output から実値を注入（コミット物にはハードコードしない）
+RUN_SA_EMAIL="$(terraform -chdir=terraform output -raw cloud_run_service_account_email)"
+DATASET_ID="$(terraform -chdir=terraform output -raw bigquery_dataset_id)"
+IMAGE_BUCKET="$(terraform -chdir=terraform output -raw image_bucket_name)"
+
+# プレースホルダ置換 → 反映（REGION は service.yaml 内で us-central1 固定）
+export IMAGE_REF RUN_SA_EMAIL PROJECT_ID DATASET_ID IMAGE_BUCKET
+sed -e "s#IMAGE_REF_PLACEHOLDER#${IMAGE_REF}#g" \
+    -e "s#RUN_SA_EMAIL_PLACEHOLDER#${RUN_SA_EMAIL}#g" \
+    -e "s#PROJECT_ID_PLACEHOLDER#${PROJECT_ID}#g" \
+    -e "s#DATASET_ID_PLACEHOLDER#${DATASET_ID}#g" \
+    -e "s#IMAGE_BUCKET_PLACEHOLDER#${IMAGE_BUCKET}#g" \
+    deploy/service.yaml | gcloud run services replace /dev/stdin --region "$REGION"
+```
+
+> リージョン整合: BigQuery dataset / GCS バケット / リモートモデル / Cloud Run を単一の `us-central1` に統一する（`service.yaml` の `REGION` も `us-central1` 固定）。
+
+### 署名 URL の上流 IAM 前提（部分失敗ハンドリング）
+
+`signed_url:true` での V4 署名 URL 発行は keyless 署名（IAM `signBlob`）を用い、Run SA 自身への `roles/iam.serviceAccountTokenCreator`（リソース＝Run SA 自身）と images バケットスコープの `roles/storage.objectViewer` が前提となる。この IAM 追補は `gcp-infrastructure` 側の作業であり本仕様単独では閉じない依存ブロッカー（Requirement 3.2/3.3 の DoD は追補適用後の実機発行に紐付く）。
+
+追補が未適用の環境では署名が失敗するが、部分失敗ハンドリング（Requirement 4.5）により当該結果は `signed_url` を省略するだけで、他結果（`image_uri`・`score`）は 200 で返る。したがって追補完了前でも検索コア機能（Requirement 1 / 3.1）はローカル起動・検証可能。

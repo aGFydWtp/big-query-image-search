@@ -71,7 +71,7 @@
   - 観測可能な完了条件: サービス定義が上流払い出しの実行 SA と必須環境変数を参照し、ハードコードがないことを確認できる
   - _Requirements: 5.1, 5.3, 5.4, 5.5_
   - _Boundary: DeployConfig_
-- [ ] 5.2 運用 runbook の作成 (P)
+- [x] 5.2 運用 runbook の作成 (P)
   - ビルド・デプロイ・必須環境変数（`REGION`・`MODEL=gemini_embedding_model` 等）・ローカル起動/検証手順、および 2.2 dry-run の記録節を `docs/runbook.md` に追記
   - 観測可能な完了条件: runbook 手順でローカル起動し検索が動作することを確認できる記述が揃う
   - _Requirements: 5.6_

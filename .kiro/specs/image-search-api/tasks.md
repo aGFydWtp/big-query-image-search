@@ -41,7 +41,7 @@
   - 観測可能な完了条件: 成功時に行を返し、失敗時に内部エラー型へ変換することを確認するテストが通る
   - _Requirements: 2.3, 4.3_
   - _Depends: 2.3_
-- [ ] 3.2 結果整形（ResultFormatter）の実装 (P)
+- [x] 3.2 結果整形（ResultFormatter）の実装 (P)
   - 各行から `image_uri`・`distance` を抽出し `score = 1 - distance`（cosine similarity）へ変換、score 降順（distance 昇順=最類似順）に整列
   - スコアの意味を「類似度（高いほど類似）」に固定し一貫させる、`content_type` を任意フィールドとして付加、0 件は空配列
   - 観測可能な完了条件: `score=1-distance` 変換・降順整列・スコア表現一貫・0 件空配列・メタデータ付加を確認する単体テストが通る

@@ -2,9 +2,9 @@
 
 - [ ] 1. プロジェクト基盤と設定モジュールの確立
 - [ ] 1.1 設定モジュール（Config）の実装
-  - 環境変数から `project_id`, `region`, `dataset_id`, `image_embeddings` テーブル名, モデル名 `gemini-embedding-2`, 対象 GCS バケットを読み込む
+  - 環境変数から `project_id`, `region`（`REGION`、固定値 `us-central1`）, `dataset_id`, `image_embeddings` テーブル名, モデル**オブジェクト名** `gemini_embedding_model`（注入する値はオブジェクト名であり、エンドポイント名 `gemini-embedding-2-preview` ではない）, 対象 GCS バケット, 実行 SA メール, 署名 URL 有効期限を読み込む
   - 必須値欠如時はフェイルファストで起動失敗させ、いかなる環境依存値もコードへハードコードしない
-  - 観測可能な完了条件: 必須環境変数が揃えば設定オブジェクトを返し、欠如時は明確なエラーで起動を中止する単体テストが通る
+  - 観測可能な完了条件: 必須環境変数が揃えば設定オブジェクトを返し、欠如時は明確なエラーで起動を中止し、`${MODEL}` の既定がオブジェクト名 `gemini_embedding_model` であることを確認する単体テストが通る
   - _Requirements: 2.5, 5.2, 5.3, 5.5_
 - [ ] 1.2 HTTP サーバ起動とルーティングの骨格実装
   - サーバ起動・ポート待受・検索エンドポイントのルーティング・ヘルスチェックを用意
@@ -12,7 +12,7 @@
   - _Requirements: 5.1, 5.3_
   - _Depends: 1.1_
 
-- [ ] 2. 入力契約と検索クエリ層の実装
+- [ ] 2. 検索クエリ前提検証と組立て
 - [ ] 2.1 入力バリデーション（InputValidation）の実装 (P)
   - `query` 非空必須、空/欠如で 400 とし BigQuery を呼ばない
   - `top_k` の許容範囲チェック（範囲外は 400 もしくは安全範囲へ丸めを一貫適用）、未指定時は既定件数
@@ -20,33 +20,38 @@
   - _Requirements: 1.3, 4.1, 4.2_
   - _Boundary: InputValidation_
   - _Depends: 1.1_
-- [ ] 2.2 検索 SQL テンプレートとクエリ組立て（SearchQueryBuilder）の実装 (P)
-  - `AI.GENERATE_EMBEDDING`（リモートモデル `gemini-embedding-2`）と `VECTOR_SEARCH`（対象 `image_embeddings.embedding`, `distance_type='COSINE'`, `top_k`）を同一 BigQuery クエリへ組み立てる
-  - モデル名・テーブル名・列名・距離タイプ・dataset を設定注入から参照し、コードへ再定義/ハードコードしない（次元 3072 は同一モデル使用で暗黙整合）
-  - `sql/search.sql` をプレースホルダ外部化テンプレートとして用意
-  - 観測可能な完了条件: 生成 SQL がモデル `gemini-embedding-2`・テーブル `image_embeddings`・`distance_type='COSINE'` を含み単一クエリであることを確認する単体テストが通る
+- [ ] 2.2 BigQuery 単一クエリ dry-run ゲート（先行検証）
+  - 実機 BigQuery dry-run で (a) `@top_k` の `top_k =>` 名前付き引数束縛可否、(b) Preview モデル `gemini_embedding_model` を含む単一クエリチェーン（`AI.GENERATE_EMBEDDING` → `VECTOR_SEARCH`）の dry-run 成否を確認する
+  - 結果で後続 SearchQueryBuilder の確定形を決める: (a) 束縛不可なら検証済み整数のテンプレ埋め込みへ、(b) 単一クエリ失敗時は 2 ジョブ分割（埋め込み生成 → `@query_embedding` を `VECTOR_SEARCH` へ渡す）の縮退案を採用する
+  - 観測可能な完了条件: dry-run 実行結果（各項目の成否・採用するテンプレ形）を research.md/runbook に記録し、後続のクエリ組立て方針が一意に確定する
+  - _Requirements: 2.3_
+  - _Depends: 1.1_
+- [ ] 2.3 検索 SQL テンプレートとクエリ組立て（SearchQueryBuilder）の実装
+  - `AI.GENERATE_EMBEDDING`（リモートモデルオブジェクト `gemini_embedding_model`, `STRUCT(3072 AS output_dimensionality)` を明示）と `VECTOR_SEARCH`（対象 `image_embeddings.embedding`, `distance_type='COSINE'`, `top_k`）を、2.2 の判定に従い単一クエリ（既定・CTE 結合）または 2 ジョブ分割（縮退）テンプレートへ組み立てる
+  - モデル名・テーブル名・列名・距離タイプ・dataset は設定注入値から `sql/search.sql` のプレースホルダ `${...}` へレンダリングし、値 `@query`/`@top_k` は BigQuery パラメータでバインドする（コードへ再定義/ハードコードしない）
+  - 観測可能な完了条件: 生成 SQL が注入値由来（`gemini_embedding_model`・`image_embeddings`・`distance_type='COSINE'`・`output_dimensionality=3072`）でレンダリングされ、既定は単一クエリ（CTE 結合）であることを確認する単体テストが通る（縮退採用時は分割 2 テンプレも検証）
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
   - _Boundary: SearchQueryBuilder, sql/search.sql_
-  - _Depends: 1.1_
+  - _Depends: 2.2_
 
 - [ ] 3. BigQuery 実行と結果整形層の実装
 - [ ] 3.1 BigQuery クライアント（BigQueryClient）の実装
-  - パラメータ化クエリを単一ジョブとして実行し行を返す
-  - タイムアウト/クエリエラーを内部エラー型へ変換し、詳細をクライアントへ漏洩させない
+  - パラメータ化クエリを実行し行を返す。既定は単一ジョブ、2.2 が縮退採用の場合は埋め込み生成 → `@query_embedding` を渡す 2 ジョブ実行へ切替える
+  - タイムアウト/クエリエラーを内部エラー型へ変換し詳細をクライアントへ漏洩させない、`context.Context` でタイムアウト/キャンセルを伝播
   - 観測可能な完了条件: 成功時に行を返し、失敗時に内部エラー型へ変換することを確認するテストが通る
   - _Requirements: 2.3, 4.3_
-  - _Depends: 2.2_
+  - _Depends: 2.3_
 - [ ] 3.2 結果整形（ResultFormatter）の実装 (P)
-  - 各行から `image_uri`・スコアを抽出し、スコア降順（最類似順）に整列
-  - `VECTOR_SEARCH` の距離出力を一貫したスコア表現へ整形（意味を固定）、`content_type` を任意フィールドとして付加、0 件は空配列
-  - 観測可能な完了条件: 降順整列・スコア表現一貫・0 件空配列・メタデータ付加を確認する単体テストが通る
+  - 各行から `image_uri`・`distance` を抽出し `score = 1 - distance`（cosine similarity）へ変換、score 降順（distance 昇順=最類似順）に整列
+  - スコアの意味を「類似度（高いほど類似）」に固定し一貫させる、`content_type` を任意フィールドとして付加、0 件は空配列
+  - 観測可能な完了条件: `score=1-distance` 変換・降順整列・スコア表現一貫・0 件空配列・メタデータ付加を確認する単体テストが通る
   - _Requirements: 1.4, 3.1, 3.4, 3.5, 4.4_
   - _Boundary: ResultFormatter_
   - _Depends: 3.1_
 - [ ] 3.3 GCS 署名付き URL 生成（SignedUrlGenerator）の実装 (P)
-  - 要求時のみ対象バケットオブジェクトへ有効期限付き署名 URL を実行 SA 権限で発行
+  - 要求時（`signed_url=true`）のみ、keyless V4 署名（`GoogleAccessID`=実行 SA メール、`SignBytes`=IAM `signBlob` 呼出、秘密鍵不使用）で images バケットオブジェクトへ有効期限付き URL を発行
   - 個別の署名失敗は当該項目で URL 省略/障害明示にとどめ、他結果返却を妨げない
-  - 観測可能な完了条件: 要求時に署名 URL を生成し、失敗時も他結果が返ることを確認するテストが通る
+  - 観測可能な完了条件: `SignBytes` をモック化し、成功時に有効期限付き V4 URL を生成し、**失敗注入時も他結果（`image_uri`・`score`）が 200 で返る部分失敗テストが通る**
   - _Requirements: 3.2, 3.3, 4.5_
   - _Boundary: SignedUrlGenerator_
   - _Depends: 1.1_
@@ -57,17 +62,25 @@
   - レスポンス/エラー JSON スキーマ（フィールド名・型）を安定契約として確定し、200/4xx/5xx をマッピング（内部詳細非漏洩）
   - 観測可能な完了条件: 正常で 200 と結果配列、空クエリで 400（クエリ未実行）、内部失敗で 5xx かつ詳細非漏洩、エラー構造が共通であることを確認するテストが通る
   - _Requirements: 1.1, 1.2, 1.5, 4.1, 4.3, 4.6_
-  - _Depends: 2.1, 2.2, 3.1, 3.2, 3.3_
+  - _Depends: 2.1, 2.3, 3.1, 3.2, 3.3_
 
 - [ ] 5. Cloud Run デプロイ構成と運用手順
 - [ ] 5.1 コンテナと Cloud Run サービス定義の作成 (P)
-  - `deploy/Dockerfile` と `deploy/service.yaml`（実行 SA 割当・環境変数・ポート・リソース）を用意し、ステートレス・最小権限・region 整合で動作させる
-  - `deploy/.env.example` に必須環境変数を網羅
+  - `deploy/Dockerfile`（マルチステージ Go ビルド）と `deploy/service.yaml`（実行 SA 割当・環境変数・ポート `$PORT`・リソース）を用意し、ステートレス・最小権限・region 整合で動作させる
+  - `deploy/.env.example` に必須環境変数を網羅し、`REGION=us-central1`・`MODEL=gemini_embedding_model`（オブジェクト名）を明記する
   - 観測可能な完了条件: サービス定義が上流払い出しの実行 SA と必須環境変数を参照し、ハードコードがないことを確認できる
   - _Requirements: 5.1, 5.3, 5.4, 5.5_
   - _Boundary: DeployConfig_
 - [ ] 5.2 運用 runbook の作成 (P)
-  - ビルド・デプロイ・必須環境変数・ローカル起動/検証手順を `docs/runbook.md` に記載
+  - ビルド・デプロイ・必須環境変数（`REGION`・`MODEL=gemini_embedding_model` 等）・ローカル起動/検証手順、および 2.2 dry-run の記録節を `docs/runbook.md` に追記
   - 観測可能な完了条件: runbook 手順でローカル起動し検索が動作することを確認できる記述が揃う
   - _Requirements: 5.6_
   - _Boundary: docs/runbook.md_
+
+- [ ] 6. 上流 IAM 依存追跡と署名 URL 実機検証ゲート
+- [ ] 6.1 上流 IAM 追補の依存追跡と署名 URL 実機検証
+  - `gcp-infrastructure` の `iam.tf` への Run SA 向け `roles/iam.serviceAccountTokenCreator`（Run SA 自身をリソース）+ `roles/storage.objectViewer`（images バケットスコープ）追補を、上流の依存ブロッカー/Revalidation Trigger として起票・追跡する（本タスクは上流の実装は行わず、依存の明示と検証に限定）
+  - 追補適用後に実行 SA で署名 URL が実機発行できることを検証し Requirement 3.2/3.3 の DoD とする。未追補時は 3.3 の部分失敗パス（URI のみ返却）でコア検索が成立することを確認する
+  - 観測可能な完了条件: 上流起票が記録され、追補適用後に署名 URL の実機発行を確認できる（未追補時は部分失敗パスでコア検索が 200 を返すことを確認できる）
+  - _Requirements: 3.2, 3.3, 5.4_
+  - _Depends: 3.3, 5.1_

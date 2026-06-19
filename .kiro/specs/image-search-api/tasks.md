@@ -26,7 +26,7 @@
   - 観測可能な完了条件: dry-run 実行結果（各項目の成否・採用するテンプレ形）を research.md/runbook に記録し、後続のクエリ組立て方針が一意に確定する
   - _Requirements: 2.3_
   - _Depends: 1.1_
-- [ ] 2.3 検索 SQL テンプレートとクエリ組立て（SearchQueryBuilder）の実装
+- [x] 2.3 検索 SQL テンプレートとクエリ組立て（SearchQueryBuilder）の実装
   - `AI.GENERATE_EMBEDDING`（リモートモデルオブジェクト `gemini_embedding_model`, `STRUCT(3072 AS output_dimensionality)` を明示）と `VECTOR_SEARCH`（対象 `image_embeddings.embedding`, `distance_type='COSINE'`, `top_k`）を、2.2 の判定に従い単一クエリ（既定・CTE 結合）または 2 ジョブ分割（縮退）テンプレートへ組み立てる
   - モデル名・テーブル名・列名・距離タイプ・dataset は設定注入値から `sql/search.sql` のプレースホルダ `${...}` へレンダリングし、値 `@query`/`@top_k` は BigQuery パラメータでバインドする（コードへ再定義/ハードコードしない）
   - 観測可能な完了条件: 生成 SQL が注入値由来（`gemini_embedding_model`・`image_embeddings`・`distance_type='COSINE'`・`output_dimensionality=3072`）でレンダリングされ、既定は単一クエリ（CTE 結合）であることを確認する単体テストが通る（縮退採用時は分割 2 テンプレも検証）

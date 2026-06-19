@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/aGFydWtp/big-query-image-search/internal/result"
@@ -65,13 +66,26 @@ const (
 type searchHandlerImpl struct {
 	search searcher
 	sign   signer
+	// logger sinks server-side diagnostics (e.g. the internal cause of a 5xx)
+	// that are deliberately withheld from the client response. Never nil after
+	// NewSearchHandler; tests inject a buffer-backed logger to assert the path.
+	logger *slog.Logger
 }
 
 // NewSearchHandler constructs the search endpoint handler from its seams. main
 // supplies the real *search.BigQueryClient and *signedurl.Generator; tests
-// supply fakes.
+// supply fakes. Server-side diagnostics go to slog.Default() (Cloud Run routes
+// stderr to Cloud Logging), so no logger plumbing is required at the call site.
 func NewSearchHandler(s searcher, sg signer) http.Handler {
-	return &searchHandlerImpl{search: s, sign: sg}
+	return &searchHandlerImpl{search: s, sign: sg, logger: slog.Default()}
+}
+
+// causer is the seam over *search.internalError, which retains the raw BigQuery
+// failure on Cause() while its Error() returns only a generic sentinel message.
+// The handler reads Cause() to log the real reason (e.g. a missing connectionUser
+// IAM grant) server-side without ever exposing it in the response (Req 4.3).
+type causer interface {
+	Cause() error
 }
 
 func (h *searchHandlerImpl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +111,11 @@ func (h *searchHandlerImpl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := h.search.Search(r.Context(), validated.Query, validated.TopK)
 	if err != nil {
-		// Generic message only: never echo upstream/internal detail (Req 4.3).
+		// Record the internal cause server-side ONLY; the client still receives a
+		// generic message with no upstream/internal detail (Req 4.3). Without this
+		// line, diagnosing a 5xx on Cloud Run requires correlating BigQuery audit
+		// logs (e.g. the connectionUser IAM grant case), which slows triage.
+		h.logSearchFailure(r.Context(), err)
 		writeError(w, http.StatusInternalServerError, codeInternal, "search failed, please retry later")
 		return
 	}
@@ -109,6 +127,21 @@ func (h *searchHandlerImpl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, searchResponse{Results: results})
+}
+
+// logSearchFailure records the underlying reason for a search 5xx to the
+// server-side log. It prefers the raw Cause() retained by *search.internalError
+// (the real BigQuery/IAM failure) and falls back to err itself for plain errors.
+// The logged detail is never written to the client response.
+func (h *searchHandlerImpl) logSearchFailure(ctx context.Context, err error) {
+	attrs := []slog.Attr{slog.String("error", err.Error())}
+	var c causer
+	if errors.As(err, &c) {
+		if cause := c.Cause(); cause != nil {
+			attrs = append(attrs, slog.String("cause", cause.Error()))
+		}
+	}
+	h.logger.LogAttrs(ctx, slog.LevelError, "search failed", attrs...)
 }
 
 // fillSignedURLs populates SignedURL on each result via the signer seam.

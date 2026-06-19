@@ -1,9 +1,11 @@
 package httpapi
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -213,6 +215,78 @@ func TestHandler_InternalErrorReturns5xxNoDetailLeak(t *testing.T) {
 		t.Errorf("response leaked raw internal detail: %s", rec.Body.String())
 	}
 	decodeError(t, rec.Body.Bytes())
+}
+
+// causeErr mirrors *search.internalError for the handler's logging seam: Error()
+// returns only a generic sentinel message (no leak) while Cause() retains the raw
+// underlying reason that must appear in the server-side log only.
+type causeErr struct {
+	sentinel string
+	cause    error
+}
+
+func (e *causeErr) Error() string { return e.sentinel }
+func (e *causeErr) Cause() error  { return e.cause }
+
+// TestHandler_InternalErrorLogsCauseServerSideOnly verifies the 5xx path records
+// the raw internal cause (via Cause()) to the server-side log while still keeping
+// it out of the client response body. This guards the diagnostic path that lets a
+// Cloud Run 500 be triaged without reaching for BigQuery audit logs.
+func TestHandler_InternalErrorLogsCauseServerSideOnly(t *testing.T) {
+	const rawCause = "bigquery: connectionUser permission denied SECRET-DETAIL"
+	const sentinel = "search: bigquery execution failed"
+
+	fs := &fakeSearcher{err: &causeErr{sentinel: sentinel, cause: errors.New(rawCause)}}
+
+	var logBuf bytes.Buffer
+	logger := slog.New(slog.NewTextHandler(&logBuf, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	h := &searchHandlerImpl{search: fs, sign: &fakeSigner{}, logger: logger}
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
+
+	if rec.Code < 500 || rec.Code > 599 {
+		t.Fatalf("status = %d, want 5xx (body=%s)", rec.Code, rec.Body.String())
+	}
+	// Client response must not leak the raw cause.
+	if strings.Contains(rec.Body.String(), "SECRET-DETAIL") {
+		t.Errorf("response leaked raw internal cause: %s", rec.Body.String())
+	}
+	// Server-side log MUST carry the raw cause for diagnosis.
+	logged := logBuf.String()
+	if logged == "" {
+		t.Fatal("expected a server-side log line for the 5xx, got none")
+	}
+	if !strings.Contains(logged, "SECRET-DETAIL") {
+		t.Errorf("server-side log missing raw cause detail; got: %s", logged)
+	}
+	if !strings.Contains(logged, "search failed") {
+		t.Errorf("server-side log missing the failure message; got: %s", logged)
+	}
+}
+
+// TestHandler_InternalErrorLogsPlainError verifies a plain error (no Cause()) is
+// still logged server-side via its Error() string, so the diagnostic path does
+// not depend on the *search.internalError type being present.
+func TestHandler_InternalErrorLogsPlainError(t *testing.T) {
+	fs := &fakeSearcher{err: errors.New("plain failure DIAG-TOKEN")}
+
+	var logBuf bytes.Buffer
+	logger := slog.New(slog.NewTextHandler(&logBuf, nil))
+	h := &searchHandlerImpl{search: fs, sign: &fakeSigner{}, logger: logger}
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
+
+	if rec.Code < 500 || rec.Code > 599 {
+		t.Fatalf("status = %d, want 5xx (body=%s)", rec.Code, rec.Body.String())
+	}
+	if strings.Contains(rec.Body.String(), "DIAG-TOKEN") {
+		t.Errorf("response leaked raw error detail: %s", rec.Body.String())
+	}
+	if !strings.Contains(logBuf.String(), "DIAG-TOKEN") {
+		t.Errorf("server-side log missing the error detail; got: %s", logBuf.String())
+	}
 }
 
 // TestHandler_ZeroRowsReturnsEmptyArray verifies 0 matches yields 200 with

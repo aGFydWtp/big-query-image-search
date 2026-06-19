@@ -22,6 +22,7 @@ locals {
     "run.googleapis.com",                # Cloud Run: search API execution runtime (Req 1.1)
     "storage.googleapis.com",            # Cloud Storage: image bucket (Req 1.1)
     "iam.googleapis.com",                # IAM: service accounts and policy bindings (Req 1.1)
+    "iamcredentials.googleapis.com",     # IAM Credentials: signBlob for keyless V4 signed URLs by the Cloud Run SA (image-search-api Req 3.2/3.3)
 
     # Enablement plumbing: the Service Usage and Cloud Resource Manager APIs are
     # the control-plane services Terraform calls to enable/manage the APIs above

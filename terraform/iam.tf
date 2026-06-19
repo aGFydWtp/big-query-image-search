@@ -92,3 +92,31 @@ resource "google_project_iam_member" "run_sa_aiplatform_user" {
   role    = "roles/aiplatform.user"
   member  = "serviceAccount:${google_service_account.cloud_run.email}"
 }
+
+# 署名付き URL（keyless V4）のための Run SA 追補（design "CloudRunIam"／本 spec の
+# Revalidation, 下流 image-search-api Requirement 3.2/3.3/5.4）。
+#
+# 検索 API は一致画像へ有効期限付きアクセスを与えるため GCS V4 署名 URL を発行する。
+# Cloud Run は SA 秘密鍵を持たないため、署名は IAM Credentials の signBlob（keyless）
+# で行う。これには以下 2 つが必要で、いずれも非 authoritative な *_iam_member で
+# 最小権限（自己 signBlob ＋ images バケットスコープ読取）を維持する。接続 SA と異なり
+# cloud_run SA は本モジュールが直接作成するため伝播待ち（time_sleep）は不要。
+
+# Requirement 3.3（署名対象オブジェクト読取）: Run SA へ画像バケットの読取権限。
+# 接続 SA と同じくバケットスコープの `roles/storage.objectViewer` をバインドし、
+# プロジェクト全体ではなく当該バケットのオブジェクト読取のみへ限定する。
+resource "google_storage_bucket_iam_member" "run_sa_image_object_viewer" {
+  bucket = google_storage_bucket.images.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.cloud_run.email}"
+}
+
+# Requirement 3.2（keyless 署名）: Run SA 自身への `roles/iam.serviceAccountTokenCreator`。
+# V4 署名 URL 生成時、SignBytes が IAM Credentials の signBlob を当該 SA に対して呼ぶため、
+# Run SA は「自分自身をリソースとして」tokenCreator を持つ必要がある（自己署名）。
+# project スコープではなく当該 SA リソースに限定して最小権限を保つ。
+resource "google_service_account_iam_member" "run_sa_self_token_creator" {
+  service_account_id = google_service_account.cloud_run.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${google_service_account.cloud_run.email}"
+}

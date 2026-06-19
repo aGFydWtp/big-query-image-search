@@ -83,6 +83,20 @@ resource "google_bigquery_dataset_iam_member" "run_sa_dataset_data_viewer" {
   member     = "serviceAccount:${google_service_account.cloud_run.email}"
 }
 
+# Requirement 5.2/5.3（接続使用）: Run SA へ BigLake 接続の使用権限。
+# 検索 API の AI.GENERATE_EMBEDDING は接続バックドのリモートモデルを呼び出すため、
+# 呼び出し元（Run SA）に接続使用権 `bigquery.connections.use` が必要になる
+# （dry-run では露見せず、実行時に "does not have bigquery.connections.use" で失敗する）。
+# dataViewer / jobUser / aiplatform.user だけでは不足する、リモートモデル実行の前提権限。
+# 接続単位の非 authoritative バインド（connectionUser）で最小権限を維持する。
+resource "google_bigquery_connection_iam_member" "run_sa_connection_user" {
+  project       = google_bigquery_connection.biglake.project
+  location      = google_bigquery_connection.biglake.location
+  connection_id = google_bigquery_connection.biglake.connection_id
+  role          = "roles/bigquery.connectionUser"
+  member        = "serviceAccount:${google_service_account.cloud_run.email}"
+}
+
 # Requirement 5.3: Run SA へ Vertex AI（クエリ埋め込み生成）利用権限。
 # CAVEAT: 接続 SA と同様、`roles/aiplatform.user` はモデル/エンドポイント単位の
 # リソーススコープ細分化が困難なためプロジェクトスコープでバインドする。付与

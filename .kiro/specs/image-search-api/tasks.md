@@ -1,7 +1,7 @@
 # Implementation Plan
 
 - [ ] 1. プロジェクト基盤と設定モジュールの確立
-- [ ] 1.1 設定モジュール（Config）の実装
+- [x] 1.1 設定モジュール（Config）の実装
   - 環境変数から `project_id`, `region`（`REGION`、固定値 `us-central1`）, `dataset_id`, `image_embeddings` テーブル名, モデル**オブジェクト名** `gemini_embedding_model`（注入する値はオブジェクト名であり、エンドポイント名 `gemini-embedding-2-preview` ではない）, 対象 GCS バケット, 実行 SA メール, 署名 URL 有効期限を読み込む
   - 必須値欠如時はフェイルファストで起動失敗させ、いかなる環境依存値もコードへハードコードしない
   - 観測可能な完了条件: 必須環境変数が揃えば設定オブジェクトを返し、欠如時は明確なエラーで起動を中止し、`${MODEL}` の既定がオブジェクト名 `gemini_embedding_model` であることを確認する単体テストが通る

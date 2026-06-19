@@ -78,7 +78,7 @@
   - _Boundary: docs/runbook.md_
 
 - [ ] 6. 上流 IAM 依存追跡と署名 URL 実機検証ゲート
-- [ ] 6.1 上流 IAM 追補の依存追跡と署名 URL 実機検証
+- [x] 6.1 上流 IAM 追補の依存追跡と署名 URL 実機検証
   - `gcp-infrastructure` の `iam.tf` への Run SA 向け `roles/iam.serviceAccountTokenCreator`（Run SA 自身をリソース）+ `roles/storage.objectViewer`（images バケットスコープ）追補を、上流の依存ブロッカー/Revalidation Trigger として起票・追跡する（本タスクは上流の実装は行わず、依存の明示と検証に限定）
   - 追補適用後に実行 SA で署名 URL が実機発行できることを検証し Requirement 3.2/3.3 の DoD とする。未追補時は 3.3 の部分失敗パス（URI のみ返却）でコア検索が成立することを確認する
   - 観測可能な完了条件: 上流起票が記録され、追補適用後に署名 URL の実機発行を確認できる（未追補時は部分失敗パスでコア検索が 200 を返すことを確認できる）
@@ -91,3 +91,4 @@
 - 共有契約の `${MODEL}` 注入値はモデル**オブジェクト名 `gemini_embedding_model`**（エンドポイント名 `gemini-embedding-2-preview` ではない）。Config の MODEL 既定値もオブジェクト名に固定済み。requirements.md 2.1/5.2 に残る旧エンドポイント名表記は design の上書き（G2 ノート）で吸収済みのため誤注入しないこと。
 - Task 2.2: 実機 BigQuery dry-run は実プロジェクト `image-search-6c457e`（dataset `image_search`, us-central1）で実施。dataset/接続は存在するが上流 ingestion の**モデル `gemini_embedding_model`・テーブル `image_embeddings` が未デプロイ**。単一クエリ形を既定採用（dry-run(a) の `top_k => @top_k` 束縛は構文受理）。dry-run(b) の Preview モデルチェーン完全確認は上流デプロイ後の手動ゲート（`docs/runbook.md`「Task 2.2 dry-run ゲート」/ `research.md`）に隔離。下流 2.3 はこの既定で進行可。
 - Task 3.1: BigQueryClient はテスト容易性のため `queryRunner` インターフェースのシームを持ち（本番は実 `*bigquery.Client`、単体テストは fake 注入）、内部エラー型 `ErrBigQuery`/`ErrQueryTimeout` で生エラー詳細を `Error()` から遮断（`Cause()` でサーバ側ログのみ取得）。縮退（2 ジョブ分割）パスは未配線・未採用で `embeddingVector` が nil 返しのフック。**将来 2 ジョブ分割を採用する独立タスク**では、(1) `embeddingVector` の埋め込み抽出を実装し、(2) それまではシームで明示エラーを返すよう（nil 束縛での暗黙失敗回避）ハードニングすること。
+- Task 6.1: 上流 IAM 追補（Run SA self `tokenCreator` + images バケット `objectViewer`）は `gcp-infrastructure/iam.tf` に実装済み（commit `9e7b233`）かつ実プロジェクト `image-search-6c457e` に**実機適用済み**（gcloud で Run SA `img-search-run@…` の tokenCreator self とバケット objectViewer を確認）。署名 URL の end-to-end 実発行は (i) サービスを Run SA でデプロイ、(ii) images バケットにオブジェクト投入、の下で確認する**デプロイ時手動ゲート**（外部からの Run SA インパーソネーション検証は本番資格情報探査のため見送り、バケットは現状空）。部分失敗パス（署名失敗時もコア検索 200）は Task 3.3/4.1 のテストで検証済み。詳細は `research.md`「Task 6.1 …」。

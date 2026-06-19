@@ -2,9 +2,9 @@
 
 ## Project Description (Input)
 
-画像セマンティック検索システムの「検索（クエリ）」層を定義する。検索利用者（クライアントアプリケーション）は、テキストクエリで GCS 上の画像を意味的に検索したいが、現状は BigQuery 上に取込済みの埋め込み（`image_embeddings` テーブル）と VECTOR INDEX が存在するのみで、それらを利用する検索インターフェースが存在しない。本仕様により、Cloud Run 上の HTTP API が、テキストクエリを取込と同一のモデル（`gemini-embedding-2`・同一次元）で埋め込み、同一の BigQuery クエリ内で `VECTOR_SEARCH` を実行し、一致した画像の参照情報（URI / 署名付き URL / スコア）を返却できるようになる。
+画像セマンティック検索システムの「検索（クエリ）」層を定義する。検索利用者（クライアントアプリケーション）は、テキストクエリで GCS 上の画像を意味的に検索したいが、現状は BigQuery 上に取込済みの埋め込み（`image_embeddings` テーブル）と VECTOR INDEX が存在するのみで、それらを利用する検索インターフェースが存在しない。本仕様により、Cloud Run 上の HTTP API が、テキストクエリを取込と同一のモデル（`gemini-embedding-2-preview`・同一次元）で埋め込み、同一の BigQuery クエリ内で `VECTOR_SEARCH` を実行し、一致した画像の参照情報（URI / 署名付き URL / スコア）を返却できるようになる。
 
-本仕様は上流 2 仕様の共有契約に厳密に従う消費者である。基盤リソース（GCS バケット・BigQuery dataset・Cloud Run 実行用サービスアカウント・IAM）は `gcp-infrastructure` が、`image_embeddings` テーブルスキーマ・埋め込み次元（3072）・リモートモデル名（`gemini-embedding-2`）・VECTOR INDEX 距離タイプ（`COSINE`）は `image-ingestion-pipeline` が source of truth として所有する。本仕様はこれらを再定義しない。
+本仕様は上流 2 仕様の共有契約に厳密に従う消費者である。基盤リソース（GCS バケット・BigQuery dataset・Cloud Run 実行用サービスアカウント・IAM）は `gcp-infrastructure` が、`image_embeddings` テーブルスキーマ・埋め込み次元（3072）・リモートモデル名（`gemini-embedding-2-preview`）・VECTOR INDEX 距離タイプ（`COSINE`）は `image-ingestion-pipeline` が source of truth として所有する。本仕様はこれらを再定義しない。
 
 ## Introduction
 
@@ -29,7 +29,7 @@
   - 認証・認可・レート制限などのエンタープライズ機能（明示要求があるまで）
 - **Adjacent expectations**:
   - 本仕様は `gcp-infrastructure` が払い出した Cloud Run 実行用サービスアカウント・IAM・BigQuery dataset・GCS バケットを前提に検索 API を実装する。
-  - 本仕様は `image-ingestion-pipeline` が定義した共有契約（テーブル名 `image_embeddings`、列 `image_uri` / `embedding`(dim=3072) / `content_type` / `generated_at`、モデル名 `gemini-embedding-2`、距離タイプ `COSINE`）に厳密に従う。これらの変更は本仕様の再検証 Trigger となる。
+  - 本仕様は `image-ingestion-pipeline` が定義した共有契約（テーブル名 `image_embeddings`、列 `image_uri` / `embedding`(dim=3072) / `content_type` / `generated_at`、モデル名 `gemini-embedding-2-preview`、距離タイプ `COSINE`）に厳密に従う。これらの変更は本仕様の再検証 Trigger となる。
   - 環境依存値（`project_id`, `region`, `dataset_id`, テーブル名、モデル名、バケット）は上流出力からパラメータとして注入され、ハードコードしない。
 
 ## Requirements
@@ -52,7 +52,7 @@
 
 #### Acceptance Criteria
 
-1. WHEN 検索リクエストを処理する THEN image-search-api SHALL クエリテキストの埋め込み生成を、取込（`image-ingestion-pipeline`）と同一のリモートモデル `gemini-embedding-2` を用いて BigQuery 上で実行する
+1. WHEN 検索リクエストを処理する THEN image-search-api SHALL クエリテキストの埋め込み生成を、取込（`image-ingestion-pipeline`）と同一のリモートモデル `gemini-embedding-2-preview` を用いて BigQuery 上で実行する
 2. WHEN クエリ埋め込みを生成する THEN image-search-api SHALL 取込側と同一の埋め込み次元（3072）で生成し、次元不一致が発生しないようにする
 3. WHEN ベクトル探索を実行する THEN image-search-api SHALL クエリ埋め込み生成と `VECTOR_SEARCH` を同一の BigQuery クエリ内で実行し、BigQuery への往復回数を削減する
 4. WHEN `VECTOR_SEARCH` を実行する THEN image-search-api SHALL 共有契約の `image_embeddings` テーブルの `embedding` 列を対象とし、取込時 VECTOR INDEX と同一の距離タイプ `COSINE` を用いる
@@ -91,7 +91,7 @@
 #### Acceptance Criteria
 
 1. WHEN サービスをデプロイする THEN image-search-api SHALL コンテナ化されたアプリケーションを Cloud Run サービスとして定義し、上流が払い出した Cloud Run 実行用サービスアカウントを割り当てる
-2. WHERE 環境依存値（`project_id`, `region`, `dataset_id`, `image_embeddings` テーブル名, モデル名 `gemini-embedding-2`, 対象 GCS バケット）THE image-search-api SHALL これらを環境変数等で外部から注入し、アプリケーションコードへハードコードしない
+2. WHERE 環境依存値（`project_id`, `region`, `dataset_id`, `image_embeddings` テーブル名, モデル名 `gemini-embedding-2-preview`, 対象 GCS バケット）THE image-search-api SHALL これらを環境変数等で外部から注入し、アプリケーションコードへハードコードしない
 3. THE image-search-api SHALL ステートレスに動作し、リクエスト間で可変な永続状態を保持しない
 4. WHEN BigQuery / Vertex AI / GCS にアクセスする THEN image-search-api SHALL 実行用サービスアカウントに付与済みの最小権限（BigQuery 実行・データ読取、Vertex AI 利用、GCS 署名/読取）のみを利用し、追加の過剰権限を要求しない
 5. WHERE BigQuery dataset・GCS バケット・リモートモデルのロケーション THE image-search-api SHALL 上流の単一 `region` と整合する設定で動作する

@@ -46,13 +46,14 @@
 ### Allowed Dependencies
 
 - 上流 `gcp-infrastructure` の出力: GCS 画像バケット名、BigQuery dataset（project 修飾識別子）、Cloud Run 実行用サービスアカウントのメール、単一 `region`。`terraform output` 由来の値を環境変数として注入する。
-- 上流 `image-ingestion-pipeline` の共有契約: テーブル `image_embeddings`、列 `image_uri` / `embedding`(dim=3072) / `content_type` / `generated_at`、リモートモデルのオブジェクト名 `gemini_embedding_model`（エンドポイント `gemini-embedding-2`）、距離タイプ `COSINE`。`${MODEL}` に注入する値は取込が作成したモデルオブジェクト名 `gemini_embedding_model` であり、検索 SQL の `MODEL` 参照が取込側と同一オブジェクトに解決される。
+- 上流 `image-ingestion-pipeline` の共有契約: テーブル `image_embeddings`、列 `image_uri` / `embedding`(dim=3072) / `content_type` / `generated_at`、リモートモデルのオブジェクト名 `gemini_embedding_model`（エンドポイント `gemini-embedding-2-preview`）、距離タイプ `COSINE`。`${MODEL}` に注入する値は取込が作成したモデルオブジェクト名 `gemini_embedding_model` であり、検索 SQL の `MODEL` 参照が取込側と同一オブジェクトに解決される。
 - BigQuery（GoogleSQL、`AI.GENERATE_EMBEDDING` + `VECTOR_SEARCH`）、Vertex AI（リモートモデル経由）、Cloud Storage（署名 URL）。
 - 制約: これらの識別子・契約値は再定義せず、パラメータ注入で消費する。ハードコード禁止。
 
 ### Revalidation Triggers
 
-- 共有契約（テーブル名 `image_embeddings`、列名、`embedding` 次元 3072、モデル名 `gemini-embedding-2`、距離タイプ `COSINE`）のいずれかが上流で変更された場合。
+- 共有契約（テーブル名 `image_embeddings`、列名、`embedding` 次元 3072、モデル名 `gemini-embedding-2-preview`、距離タイプ `COSINE`）のいずれかが上流で変更された場合。
+- **上流 Revalidation 起票（image-ingestion-pipeline Task 0, 2026-06-19）**: エンドポイント名が `gemini-embedding-2`→`gemini-embedding-2-preview` に修正された（実在しない名称の是正）。本仕様は `${MODEL}` にモデル**オブジェクト名** `gemini_embedding_model` を注入するため**機能的契約は不変**で、検索クエリ実装の変更は不要。ドキュメント上のエンドポイント名のみ整合済み。次元 3072・距離タイプ COSINE も不変。`gemini-embedding-2-preview` は **Preview ステージ**である点に留意（提供形態変更時は本トリガー対象）。
 - `gcp-infrastructure` の出力名・出力構造（バケット名・dataset・実行 SA メール・region）が変更された場合。
 - Cloud Run 実行 SA に付与される IAM ロール集合が変更され、署名 URL / BigQuery / Vertex 利用権限に影響する場合。
 - HTTP リクエスト/レスポンス契約（フィールド名・型・エラー構造）を変更する場合（下流クライアントへ影響）。
@@ -75,7 +76,7 @@ graph TB
     Signer --> Response[http json response]
     Format --> Response
     Upstream1[gcp-infrastructure outputs: run SA dataset bucket region] -. injected .-> Config
-    Upstream2[image-ingestion-pipeline shared contract: image_embeddings model gemini-embedding-2 dim 3072 COSINE] -. consumed .-> QueryBuilder
+    Upstream2[image-ingestion-pipeline shared contract: image_embeddings model gemini-embedding-2-preview dim 3072 COSINE] -. consumed .-> QueryBuilder
     RunSA[cloud run service account] -. iam .-> BQ
     RunSA -. iam .-> Signer
 ```
@@ -92,7 +93,7 @@ graph TB
 |-------|------------------|-----------------|-------|
 | ランタイム | Cloud Run（コンテナ、ステートレス）| HTTP サービス実行基盤 | 上流払い出しの実行 SA を割当 |
 | 検索エンジン | BigQuery (GoogleSQL) | クエリ埋め込み + ベクトル探索の実行 | `AI.GENERATE_EMBEDDING` + `VECTOR_SEARCH` を同一クエリ |
-| 埋め込みモデル | リモートモデル → `gemini-embedding-2` | クエリテキスト→ベクトル生成 | 取込と同一、次元 3072 |
+| 埋め込みモデル | リモートモデル → `gemini-embedding-2-preview` | クエリテキスト→ベクトル生成 | 取込と同一、次元 3072 |
 | ベクトル探索 | BigQuery VECTOR INDEX（COSINE）| 近似最近傍探索 | 取込時インデックスと同一距離タイプ |
 | 画像配信 | Cloud Storage 署名付き URL | 一致画像への一時アクセス | 実行 SA の署名権限を利用 |
 | 設定 | 環境変数注入 | 環境依存値の外部化 | 上流 `terraform output` から供給 |
@@ -146,7 +147,7 @@ sequenceDiagram
     alt invalid input
         API-->>Client: 400 error
     else valid
-        API->>BQ: single query: AI.GENERATE_EMBEDDING(gemini-embedding-2) + VECTOR_SEARCH(image_embeddings, COSINE, top_k)
+        API->>BQ: single query: AI.GENERATE_EMBEDDING(gemini-embedding-2-preview) + VECTOR_SEARCH(image_embeddings, COSINE, top_k)
         alt bigquery error
             BQ-->>API: error
             API-->>Client: 5xx error (no internal detail)
@@ -235,7 +236,7 @@ sequenceDiagram
 | Requirements | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6 |
 
 **Responsibilities & Constraints**
-- クエリ埋め込み生成（`AI.GENERATE_EMBEDDING`、リモートモデル `gemini-embedding-2`）と `VECTOR_SEARCH`（対象 `image_embeddings.embedding`、`distance_type='COSINE'`、`top_k`）を **同一クエリ** に組み立てる。
+- クエリ埋め込み生成（`AI.GENERATE_EMBEDDING`、リモートモデル `gemini-embedding-2-preview`）と `VECTOR_SEARCH`（対象 `image_embeddings.embedding`、`distance_type='COSINE'`、`top_k`）を **同一クエリ** に組み立てる。
 - モデル名・テーブル名・列名・距離タイプ・dataset を設定（注入値）から参照し、コード内へ再定義・ハードコードしない。
 - 次元（3072）は取込と同一モデルを用いることで暗黙整合し、不一致を生じさせない。
 
@@ -327,7 +328,7 @@ sequenceDiagram
 | Requirements | 2.5, 5.2, 5.3, 5.5 |
 
 **Responsibilities & Constraints**
-- `project_id`, `region`, `dataset_id`, `image_embeddings` テーブル名, モデル名 `gemini-embedding-2`, 対象バケットを環境変数から読み込む。
+- `project_id`, `region`, `dataset_id`, `image_embeddings` テーブル名, モデル名 `gemini-embedding-2-preview`, 対象バケットを環境変数から読み込む。
 - 必須値の欠如時は起動失敗（フェイルファスト）。コードへのハードコード禁止。
 
 **Dependencies**
@@ -368,7 +369,7 @@ image_embeddings（image-ingestion-pipeline 所有, source of truth）
 - content_type   STRING            -- MIME タイプ（任意でレスポンスに付加）
 - generated_at   TIMESTAMP         -- 埋め込み生成時刻（本 API は不使用または将来用）
 索引: VECTOR INDEX(embedding) distance_type=COSINE（取込所有）
-モデル: リモートモデル gemini-embedding-2（取込所有、クエリ埋め込みで同一を使用）
+モデル: リモートモデル gemini-embedding-2-preview（取込所有、クエリ埋め込みで同一を使用）
 ```
 
 参照整合性: 本 API はこのテーブル・インデックス・モデルを **読み取り/呼び出しのみ** で消費する。スキーマ・次元・距離タイプ・モデル名の所有者は `image-ingestion-pipeline`。

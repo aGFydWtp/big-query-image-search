@@ -1,10 +1,10 @@
 # Implementation Plan
 
-- [ ] 0. 【最優先・ブロッキング】埋め込み生成の技術前提を実装前に実機検証する（spike）
-- [ ] 0.1 `gemini-embedding-2` × `AI.GENERATE_EMBEDDING` の画像入力可否・出力仕様を確定する
+- [x] 0. 【最優先・ブロッキング】埋め込み生成の技術前提を実装前に実機検証する（spike）
+- [x] 0.1 `gemini-embedding-2-preview` × `AI.GENERATE_EMBEDDING` の画像入力可否・出力仕様を確定する
   - 上流が払い出した dataset・接続を用い、GCS 画像 数枚に対する最小スパイクを実施して以下を一次ソース（公式ドキュメント＋実機実行）で確定する:
     - 画像（Object Table）入力に対する正しい関数（`AI.GENERATE_EMBEDDING` か従来の `ML.GENERATE_EMBEDDING` か）と引数シグネチャ
-    - `gemini-embedding-2` がマルチモーダル（画像）入力に対応すること、および実際の出力埋め込み次元（設計の共有契約 3072 と一致するか）
+    - `gemini-embedding-2-preview` がマルチモーダル（画像）入力に対応すること、および実際の出力埋め込み次元（設計の共有契約 3072 と一致するか）
     - 出力スキーマの実列名（埋め込み列名・ステータス/エラー列名）— 失敗行フィルタ（Issue 2 / 4.4）の確定に必要
   - 検証結果を design.md（Technology Stack / EmbeddingGenerationBatch / Data Models / Error Handling）と requirements.md（3.2 次元）へ反映し、不一致があれば共有契約（次元・モデル名・関数）を更新したうえで下流 `image-search-api` の Revalidation Trigger を起票する
   - 完了条件: 関数名・引数・出力列名・実次元が確定し、設計の共有契約と整合（または整合するよう更新済み）。後続タスク 2.2 / 3.1 / 4.1 の DDL/DML はこの確定値に基づいて実装する
@@ -28,9 +28,9 @@
   - _Boundary: ObjectTable_
 
 - [ ] 2.2 (P) リモートモデル作成 SQL を実装する
-  - `sql/remote_model.sql` に `CREATE OR REPLACE MODEL ... REMOTE WITH CONNECTION` を実装し、`OPTIONS(ENDPOINT='gemini-embedding-2')` を指定する
+  - `sql/remote_model.sql` に `CREATE OR REPLACE MODEL ... REMOTE WITH CONNECTION` を実装し、`OPTIONS(ENDPOINT='gemini-embedding-2-preview')` を指定する
   - モデルと入力テーブルを同一 `region`・同一 dataset に置く前提をコメントで明示し、Terraform 管理外の SQL 資産であることを記す
-  - 完了条件: 実行後にリモートモデルが存在し、Remote endpoint が `gemini-embedding-2` であること、再実行が冪等
+  - 完了条件: 実行後にリモートモデルが存在し、Remote endpoint が `gemini-embedding-2-preview` であること、再実行が冪等
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
   - _Boundary: RemoteModel_
 
@@ -81,3 +81,15 @@
   - 完了条件: runbook の順序どおりに実行すると embeddings テーブルと VECTOR INDEX が生成され、検証クエリが全項目を通過する
   - _Requirements: 6.2, 6.4_
   - _Depends: 2.1, 2.2, 3.1, 4.1, 4.2, 5.1, 6.1_
+
+## Implementation Notes
+
+- **Task 0（2026-06-19, 実機＋公式ドキュメント一次確認で確定）— 後続 2.2 / 3.1 / 4.1 / 4.4 の前提**:
+  - **関数**: GCS 画像（Object Table, `object_metadata='SIMPLE'`）入力は `AI.GENERATE_EMBEDDING(MODEL, TABLE <object_table>, STRUCT(3072 AS output_dimensionality))` が正。Object Table 入力では `content` 列不要、絞り込みは `WHERE`/`ORDER BY`/`LIMIT` のみ。`ML.GENERATE_EMBEDDING` は使用しない。
+  - **モデル（2.2）**: `OPTIONS(ENDPOINT='gemini-embedding-2-preview')`。素の `gemini-embedding-2` は実在せず作成不可（実機エラー確認済み）。`-preview` 版は `us-central1` で作成成功。**Preview ステージ**（BigQuery が GA 推奨を警告）。モデルオブジェクト名は共有契約どおり `gemini_embedding_model`。
+  - **次元（3.1）**: 3072（`gemini-embedding-2-preview` でのみ達成。GA の `multimodalembedding@001` は最大 1408）。採用案 A = 3072 維持。
+  - **出力列／失敗行フィルタ（4.1, 4.4）**: 埋め込み列 `embedding`（`ARRAY<FLOAT64>`）、ステータス列 `status`（空文字＝成功）。MERGE 条件は `status = '' AND embedding IS NOT NULL AND ARRAY_LENGTH(embedding) = 3072`。
+  - **VECTOR INDEX（5.1）**: `OPTIONS(index_type='IVF', distance_type='COSINE')`、populate 下限 約 10MB（`BASE_TABLE_TOO_SMALL`）。
+  - **環境（実 identifier）**: dataset `image-search-6c457e.image_search`、接続 `projects/99780421240/locations/us-central1/connections/image-search-biglake`、bucket `image-search-6c457e-imgsearch-images`、region `us-central1`。
+  - **残存・運用者委譲**: 取込 bucket は現状**画像0件**のため、実画像での `AI.GENERATE_EMBEDDING` 通し実行（実次元 3072・`status` 挙動の実データ確認）は未実施。画像投入後に `validate.sql`（6.1）で実機確認すること。本確定はモデル作成可否の実機テスト＋公式ドキュメント一次ソースに基づく。
+  - **下流連携**: `image-search-api` のエンドポイント名参照を `-preview` に整合済み（モデルオブジェクト名注入のため機能的契約は不変）。

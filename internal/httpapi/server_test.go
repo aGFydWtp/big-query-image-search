@@ -3,6 +3,7 @@ package httpapi
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -53,5 +54,38 @@ func TestSearchRouteUsesInjectedHandler(t *testing.T) {
 
 	if rec.Code != marker {
 		t.Fatalf("injected search handler not used: got status %d, want %d", rec.Code, marker)
+	}
+}
+
+// TestRootServesEmbeddedUI confirms the embedded search SPA is served at the
+// site root: GET / returns 200 with the index.html document. This is the
+// same-origin delivery that lets the browser call POST /search without CORS.
+func TestRootServesEmbeddedUI(t *testing.T) {
+	router := NewRouter(nil)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("GET /: got status %d, want %d", rec.Code, http.StatusOK)
+	}
+	if body := rec.Body.String(); !strings.Contains(body, "<!doctype html") && !strings.Contains(body, "<!DOCTYPE html") {
+		t.Fatalf("GET /: body does not look like the embedded index.html (len=%d)", rec.Body.Len())
+	}
+}
+
+// TestStaticAssetIsServed confirms the SPA's referenced assets resolve under the
+// catch-all route: GET /js/app.js returns 200 from the embedded tree. Without
+// this the UI would load but its module script would 404.
+func TestStaticAssetIsServed(t *testing.T) {
+	router := NewRouter(nil)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/js/app.js", nil)
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("GET /js/app.js: got status %d, want %d", rec.Code, http.StatusOK)
 	}
 }

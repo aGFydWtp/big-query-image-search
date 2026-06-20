@@ -35,6 +35,11 @@ func NewRouter(searchHandler http.Handler) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET "+healthPath, handleHealth)
 	mux.Handle("POST "+searchPath, searchHandler)
+	// Serve the embedded search UI at the site root. This catch-all GET route is
+	// only matched after /healthz and /search (longest-pattern wins), so it never
+	// shadows the API. Same-origin delivery means the browser calls POST /search
+	// without any CORS configuration.
+	mux.Handle("GET /", staticHandler())
 	return mux
 }
 

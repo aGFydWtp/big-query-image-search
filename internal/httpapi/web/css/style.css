@@ -1,0 +1,580 @@
+/* === CSS Custom Properties === */
+:root {
+    --color-bg: #faf9f6;
+    --color-surface: #ffffff;
+    --color-text: #26231d;
+    --color-text-secondary: #6f6a60;
+    --color-accent: #b45309;
+    --color-accent-strong: #d97706;
+    --color-accent-soft: rgba(180, 83, 9, 0.22);
+    --color-border: #e8e4da;
+    --color-error: #dc2626;
+    --color-chip-bg: #f3f1ea;
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2.5rem;
+    --radius: 12px;
+    --shadow: 0 1px 4px rgba(40, 35, 25, 0.08);
+    --shadow-hover: 0 12px 32px rgba(40, 35, 25, 0.16);
+}
+
+/* === Reset & Base === */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Segoe UI", Roboto, sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* === Header === */
+.app-header {
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-md) var(--spacing-lg);
+}
+
+.app-header h1 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.app-header .tagline {
+    margin-top: var(--spacing-xs);
+    font-size: 0.9rem;
+    letter-spacing: 0.12em;
+    color: var(--color-text-secondary);
+}
+
+.app-header::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 2px;
+    margin: var(--spacing-md) auto 0;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-accent-strong), transparent);
+}
+
+/* === Search Form === */
+#search-section {
+    max-width: 680px;
+    margin: 0 auto var(--spacing-xl);
+    padding: 0 var(--spacing-md);
+}
+
+.search-input-wrapper {
+    display: flex;
+    gap: var(--spacing-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 6px;
+    box-shadow: var(--shadow);
+    transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.search-input-wrapper:focus-within {
+    border-color: var(--color-accent-strong);
+    box-shadow: 0 0 0 4px var(--color-accent-soft);
+}
+
+#search-input {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 1.05rem;
+    background: transparent;
+    color: var(--color-text);
+    border: none;
+    outline: none;
+}
+
+#search-input::placeholder {
+    color: var(--color-text-secondary);
+}
+
+#search-button {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-accent-strong), var(--color-accent));
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.15s;
+    white-space: nowrap;
+}
+
+#search-button:hover:not(:disabled) {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+}
+
+#search-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.char-count {
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    margin-top: var(--spacing-xs);
+    padding-right: var(--spacing-md);
+}
+
+/* === Query Info === */
+#query-info {
+    max-width: 1200px;
+    margin: 0 auto var(--spacing-md);
+    padding: 0 var(--spacing-md);
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+}
+
+.query-info-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.query-info-text {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.query-info-arrow {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+/* === Filter Chip (クエリ解釈: カテゴリラベル + 値の分割チップ) === */
+.filter-chip {
+    display: inline-flex;
+    align-items: stretch;
+    overflow: hidden;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    box-shadow: var(--shadow);
+}
+
+.filter-chip-kind {
+    padding: 3px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-text-secondary);
+    background: var(--color-chip-bg);
+    border-right: 1px solid var(--color-border);
+}
+
+.filter-chip-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 11px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.filter-chip-value .match-swatch {
+    width: 13px;
+    height: 13px;
+}
+
+/* === Match List (マッチ理由: アイコン + 構造化テキストの行) === */
+.match-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px dashed var(--color-border);
+}
+
+.match-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    color: var(--color-text);
+}
+
+.match-icon {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--color-chip-bg);
+    color: var(--color-accent);
+}
+
+.match-icon svg {
+    width: 15px;
+    height: 15px;
+}
+
+.match-swatch {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid rgba(40, 35, 25, 0.12);
+    flex: none;
+}
+
+.match-swatch-light {
+    border-color: rgba(40, 35, 25, 0.3);
+}
+
+.match-value {
+    font-weight: 700;
+}
+
+/* === Score Meter (一致度: リングゲージ + 横に数字/ラベル) === */
+.score-meter {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.score-ring {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    transform: rotate(-90deg);
+    display: block;
+}
+
+.score-ring-track {
+    fill: none;
+    stroke: var(--color-border);
+    stroke-width: 5;
+}
+
+.score-ring-fill {
+    fill: none;
+    stroke: var(--color-accent-strong);
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.7s ease;
+}
+
+.score-meter-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.15;
+}
+
+.score-meter-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
+}
+
+.score-meter-value small {
+    font-size: 0.6em;
+    font-weight: 700;
+    margin-left: 1px;
+    color: var(--color-text-secondary);
+}
+
+.score-meter-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary);
+}
+
+/* === Results === */
+#results-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md) var(--spacing-xl);
+}
+
+#results-header {
+    margin-bottom: var(--spacing-md);
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+}
+
+/* === Result Grid (Responsive) === */
+.result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+/* === Result Card === */
+.result-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    animation: card-in 0.5s ease backwards;
+}
+
+.result-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--color-accent-soft);
+}
+
+@keyframes card-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-card-frame {
+    position: relative;
+    overflow: hidden;
+}
+
+.result-card-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    display: block;
+    background: #efede8;
+    transition: transform 0.45s ease;
+}
+
+.result-card:hover .result-card-image {
+    transform: scale(1.05);
+}
+
+.result-card-body {
+    padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+}
+
+.result-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+}
+
+.result-card-titles {
+    min-width: 0;
+}
+
+.result-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result-card-artist {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* === Lightbox === */
+.lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-lg);
+    background: rgba(250, 249, 246, 0.93);
+    backdrop-filter: blur(12px);
+    animation: lightbox-fade 0.25s ease;
+}
+
+@keyframes lightbox-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.lightbox-figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: min(1100px, 94vw);
+    animation: lightbox-zoom 0.3s ease;
+}
+
+@keyframes lightbox-zoom {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.lightbox-image {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 20px 60px rgba(40, 35, 25, 0.35);
+}
+
+.lightbox-caption {
+    margin-top: var(--spacing-lg);
+    text-align: center;
+    max-width: 760px;
+}
+
+.lightbox-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.lightbox-meta {
+    margin-top: 4px;
+    font-size: 1.05rem;
+    color: var(--color-text-secondary);
+}
+
+/* ライトボックス: 一致度リング + マッチ理由の横並びパネル */
+.lightbox-match-panel {
+    margin-top: var(--spacing-md);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    text-align: left;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.lightbox-match-panel .score-ring {
+    width: 44px;
+    height: 44px;
+}
+
+.lightbox-match-panel .score-meter-value {
+    font-size: 1.5rem;
+}
+
+.lightbox-match-panel .match-list {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+.lightbox-match-panel .match-row {
+    font-size: 1.02rem;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-lg);
+    width: 46px;
+    height: 46px;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.lightbox-close:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* === Loading === */
+.loading {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-secondary);
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-accent-strong);
+    border-radius: 50%;
+    margin: 0 auto var(--spacing-sm);
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* === Empty & Error Messages === */
+.empty-message, .error-message {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-secondary);
+}
+
+.error-message {
+    color: var(--color-error);
+}
+
+/* === Mobile (< 768px) === */
+@media (max-width: 768px) {
+    .result-grid {
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .app-header h1 {
+        font-size: 1.4rem;
+    }
+
+    #search-section {
+        padding: 0 var(--spacing-sm);
+    }
+
+    .lightbox-image {
+        max-height: 58vh;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .result-card,
+    .result-card-image,
+    .lightbox,
+    .lightbox-figure {
+        animation: none;
+        transition: none;
+    }
+}

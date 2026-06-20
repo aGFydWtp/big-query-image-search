@@ -15,3 +15,8 @@ sql/params.env
 # image-search-api: Go ビルド成果物（ローカルビルドの混入防止）
 /server
 cmd/server/server
+
+# scripts/aic_seed.py: Python 仮想環境・キャッシュ（使い捨てシードツール）
+.venv/
+__pycache__/
+*.pyc

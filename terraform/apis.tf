@@ -23,6 +23,8 @@ locals {
     "storage.googleapis.com",            # Cloud Storage: image bucket (Req 1.1)
     "iam.googleapis.com",                # IAM: service accounts and policy bindings (Req 1.1)
     "iamcredentials.googleapis.com",     # IAM Credentials: signBlob for keyless V4 signed URLs by the Cloud Run SA (image-search-api Req 3.2/3.3)
+    "iap.googleapis.com",                # IAP: Cloud Run 本体への認証ゲート（方式b: cloud_run_service.tf の iap_enabled / iap.tf のアクセス制御）
+    "orgpolicy.googleapis.com",          # Org Policy: iam.allowedPolicyMemberDomains をプロジェクト単位で緩和（org_policy.tf, 別テナント許可）
 
     # Enablement plumbing: the Service Usage and Cloud Resource Manager APIs are
     # the control-plane services Terraform calls to enable/manage the APIs above

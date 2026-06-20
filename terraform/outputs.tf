@@ -48,3 +48,15 @@ output "cloud_run_service_account_email" {
   description = "Cloud Run 実行サービスアカウントのメールアドレス（下流が Cloud Run サービスへバインドする識別子）"
   value       = google_service_account.cloud_run.email
 }
+
+output "cloud_run_service_uri" {
+  # IAP ゲート越しにアクセスする検索 UI/API のエンドポイント URL（方式b）。
+  description = "Cloud Run 検索 API サービスの URL（IAP 経由でアクセスする入口）"
+  value       = google_cloud_run_v2_service.api.uri
+}
+
+output "cloud_run_service_name" {
+  # 取り込んだ Cloud Run サービス名（IAP IAM 付与・運用参照用）。
+  description = "Cloud Run 検索 API サービス名"
+  value       = google_cloud_run_v2_service.api.name
+}

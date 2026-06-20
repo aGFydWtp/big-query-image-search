@@ -30,3 +30,17 @@ region = "us-central1"
 # Optional: explicit image bucket name. When omitted/empty, the name is derived
 # as "<project_id>-<name_prefix>-images".
 # image_bucket_name = ""
+
+# --- Cloud Run / IAP (方式b) ---
+# 機微値は git 追跡外の *.tfvars（例: iap.auto.tfvars）に置くこと。Terraform は
+# *.auto.tfvars を自動読込する。下記は雛形（実値はコミットしない）。
+
+# Optional: import 基準のコンテナイメージ（日常リリースは gcloud run deploy 側）。
+# api_image = "us-central1-docker.pkg.dev/<project>/containers/image-search-api:<tag>"
+
+# IAP 経由で閲覧を許可するプリンシパル（roles/iap.httpsResourceAccessor）。
+# iap_members = ["domain:example.com", "group:viewers@example.com", "user:alice@example.com"]
+
+# ドメイン制限共有へ追加で許可する Cloud Identity 顧客ID（別テナント許可時のみ）。
+# 自組織ドメインは org ポリシーから継承されるため不要。空なら org_policy は作成しない。
+# allowed_member_domain_customer_ids = ["C0XXXXXXX"]

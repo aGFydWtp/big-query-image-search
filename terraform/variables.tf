@@ -91,3 +91,47 @@ variable "image_bucket_name" {
     error_message = "image_bucket_name must be empty (to derive automatically) or a valid GCS bucket name (3-63 chars, lowercase letters/digits/hyphens/underscores/dots)."
   }
 }
+
+# --- Cloud Run service / IAP (方式b: Cloud Run 本体を Terraform 管理し IAP を有効化) ---
+#
+# 設計境界の変更（重要）: 元々 cloud_run_sa.tf のコメント通り、Cloud Run サービス本体は
+# この spec の管理外（image-search-api spec が gcloud デプロイで所有）だった。方式 b では
+# 本体を本モジュールに取り込み IAP を IaC 管理する。アプリのイメージ更新は引き続き
+# `gcloud run deploy`（コミットハッシュタグ）で行えるよう、cloud_run_service.tf 側で
+# image を ignore_changes 対象にしている（var.api_image は import 時点の基準値）。
+
+variable "api_image" {
+  description = "Cloud Run にデプロイする検索 API のコンテナイメージ（Artifact Registry の完全参照）。アプリのリリースは gcloud run deploy 側が更新するため、本値は import/初期 apply の基準値で、cloud_run_service.tf の lifecycle.ignore_changes で日常デプロイのドリフトを抑止する。"
+  type        = string
+  default     = "us-central1-docker.pkg.dev/image-search-6c457e/containers/image-search-api:a171c5e"
+}
+
+variable "embeddings_table" {
+  description = "検索 API の EMBEDDINGS_TABLE 環境変数（埋め込みテーブル名）。"
+  type        = string
+  default     = "image_embeddings"
+}
+
+variable "embedding_model" {
+  description = "検索 API の MODEL 環境変数（BigQuery リモート埋め込みモデル名）。"
+  type        = string
+  default     = "gemini_embedding_model"
+}
+
+variable "signed_url_expiry" {
+  description = "検索 API の SIGNED_URL_EXPIRY 環境変数（V4 署名 URL の有効期限）。"
+  type        = string
+  default     = "15m"
+}
+
+variable "iap_members" {
+  description = "IAP 経由で検索 UI/API の閲覧を許可するプリンシパル一覧（roles/iap.httpsResourceAccessor を付与）。例: [\"user:foo@example.com\", \"group:team@example.com\"]。空ならアクセス権は付与されない（IAP 有効でも誰も到達不可）。"
+  type        = list(string)
+  default     = []
+}
+
+variable "allowed_member_domain_customer_ids" {
+  description = "ドメイン制限共有（iam.allowedPolicyMemberDomains）の許可リストへ「追加」する Cloud Identity 顧客ID 一覧（例: [\"C0xxxxxxx\"]）。自組織は org から継承されるため不要で、別テナントを IAP 許可するときだけ指定する。値は機微情報のため git 追跡外の *.tfvars（iap.auto.tfvars 等）に置く。空なら org_policy.tf は何も作らない（既定の組織ポリシーのまま）。"
+  type        = list(string)
+  default     = []
+}

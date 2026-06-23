@@ -1,0 +1,1321 @@
+{
+  "_meta": {
+    "run_at": "2026-06-23T23:12:44",
+    "k": 10,
+    "candidates_per_channel": 50,
+    "rrf_k": 60,
+    "engine": "bigquery gemini-embedding-2-preview + VECTOR_SEARCH COSINE",
+    "lexical": "char-bigram BM25 over JP captions (eval_captions_ja.json) — 天井検証",
+    "modes": [
+      "raw",
+      "rewritten",
+      "rrf_vec",
+      "hybrid",
+      "full"
+    ]
+  },
+  "summary": {
+    "raw": {
+      "overall": {
+        "precision": 0.5970588235294115,
+        "recall": 0.6450980392156863,
+        "ndcg": 0.642605515087967,
+        "n": 34
+      },
+      "tag_hit": {
+        "precision": 0.6571428571428571,
+        "recall": 0.7349206349206349,
+        "ndcg": 0.7264357731258927,
+        "n": 21
+      },
+      "tag_miss": {
+        "precision": 0.5000000000000001,
+        "recall": 0.5000000000000001,
+        "ndcg": 0.5071874059497801,
+        "n": 13
+      }
+    },
+    "rewritten": {
+      "overall": {
+        "precision": 0.5705882352941177,
+        "recall": 0.6282679738562092,
+        "ndcg": 0.6434861808961292,
+        "n": 34
+      },
+      "tag_hit": {
+        "precision": 0.6285714285714286,
+        "recall": 0.721957671957672,
+        "ndcg": 0.7139111737223583,
+        "n": 21
+      },
+      "tag_miss": {
+        "precision": 0.4769230769230769,
+        "recall": 0.4769230769230769,
+        "ndcg": 0.5297227309460674,
+        "n": 13
+      }
+    },
+    "rrf_vec": {
+      "overall": {
+        "precision": 0.611764705882353,
+        "recall": 0.6645424836601309,
+        "ndcg": 0.6699776868335774,
+        "n": 34
+      },
+      "tag_hit": {
+        "precision": 0.6809523809523811,
+        "recall": 0.7664021164021164,
+        "ndcg": 0.7567862402770379,
+        "n": 21
+      },
+      "tag_miss": {
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.5297484851172178,
+        "n": 13
+      }
+    },
+    "hybrid": {
+      "overall": {
+        "precision": 0.4676470588235295,
+        "recall": 0.5117647058823531,
+        "ndcg": 0.5351553416943016,
+        "n": 34
+      },
+      "tag_hit": {
+        "precision": 0.4904761904761906,
+        "recall": 0.5619047619047619,
+        "ndcg": 0.5927134146643283,
+        "n": 21
+      },
+      "tag_miss": {
+        "precision": 0.43076923076923074,
+        "recall": 0.43076923076923074,
+        "ndcg": 0.4421769161273353,
+        "n": 13
+      }
+    },
+    "full": {
+      "overall": {
+        "precision": 0.5470588235294118,
+        "recall": 0.6008169934640524,
+        "ndcg": 0.6262797085113536,
+        "n": 34
+      },
+      "tag_hit": {
+        "precision": 0.5809523809523811,
+        "recall": 0.6679894179894181,
+        "ndcg": 0.6908701650488407,
+        "n": 21
+      },
+      "tag_miss": {
+        "precision": 0.49230769230769234,
+        "recall": 0.49230769230769234,
+        "ndcg": 0.5219412787200285,
+        "n": 13
+      }
+    }
+  },
+  "per_query": {
+    "raw": [
+      {
+        "id": "q01",
+        "type": "tag_hit",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.933745776545611
+      },
+      {
+        "id": "q02",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q03",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q04",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.199306233590118
+      },
+      {
+        "id": "q05",
+        "type": "tag_hit",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.7917063341896681
+      },
+      {
+        "id": "q06",
+        "type": "tag_hit",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.9216017310213247
+      },
+      {
+        "id": "q07",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.6578986223737446
+      },
+      {
+        "id": "q08",
+        "type": "tag_hit",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8572048559638628
+      },
+      {
+        "id": "q09",
+        "type": "tag_hit",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.9363792118010483
+      },
+      {
+        "id": "q10",
+        "type": "tag_hit",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.43780685607566444
+      },
+      {
+        "id": "q11",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q12",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q13",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.6117748521784964
+      },
+      {
+        "id": "q14",
+        "type": "tag_hit",
+        "precision": 0.7,
+        "recall": 0.7,
+        "ndcg": 0.6848374495230163
+      },
+      {
+        "id": "q15",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.3471357245055706
+      },
+      {
+        "id": "q16",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.36352581989644606
+      },
+      {
+        "id": "q17",
+        "type": "tag_miss",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.25284102718517737
+      },
+      {
+        "id": "q18",
+        "type": "tag_miss",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.2578753740644926
+      },
+      {
+        "id": "q19",
+        "type": "tag_miss",
+        "precision": 0.1,
+        "recall": 0.1,
+        "ndcg": 0.13886244387355454
+      },
+      {
+        "id": "q20",
+        "type": "tag_miss",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.5326208815196265
+      },
+      {
+        "id": "q21",
+        "type": "tag_miss",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.9052116356304493
+      },
+      {
+        "id": "q22",
+        "type": "tag_miss",
+        "precision": 0.0,
+        "recall": 0.0,
+        "ndcg": 0.0
+      },
+      {
+        "id": "q23",
+        "type": "tag_miss",
+        "precision": 0.2,
+        "recall": 0.2,
+        "ndcg": 0.28371255449703187
+      },
+      {
+        "id": "q24",
+        "type": "tag_miss",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q25",
+        "type": "tag_miss",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.6331992944486872
+      },
+      {
+        "id": "q26",
+        "type": "tag_miss",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.6698623505528798
+      },
+      {
+        "id": "q27",
+        "type": "tag_miss",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.8899541168509599
+      },
+      {
+        "id": "q28",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6666666666666666,
+        "ndcg": 0.6992056376732811
+      },
+      {
+        "id": "q29",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 1.0,
+        "ndcg": 0.9447176050778178
+      },
+      {
+        "id": "q30",
+        "type": "tag_hit",
+        "precision": 0.2,
+        "recall": 0.5,
+        "ndcg": 0.5078961547485289
+      },
+      {
+        "id": "q31",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.6666666666666666,
+        "ndcg": 0.5064767203222518
+      },
+      {
+        "id": "q32",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.8,
+        "ndcg": 0.8539316501572937
+      },
+      {
+        "id": "q33",
+        "type": "tag_miss",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.42331179510529354
+      },
+      {
+        "id": "q34",
+        "type": "tag_miss",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.6059848036189867
+      }
+    ],
+    "rewritten": [
+      {
+        "id": "q01",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.6461194268314837
+      },
+      {
+        "id": "q02",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q03",
+        "type": "tag_hit",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8572048559638628
+      },
+      {
+        "id": "q04",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.4440973278132557
+      },
+      {
+        "id": "q05",
+        "type": "tag_hit",
+        "precision": 0.7,
+        "recall": 0.7,
+        "ndcg": 0.6378891765242928
+      },
+      {
+        "id": "q06",
+        "type": "tag_hit",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8603818544462509
+      },
+      {
+        "id": "q07",
+        "type": "tag_hit",
+        "precision": 0.7,
+        "recall": 0.7,
+        "ndcg": 0.7385567757549499
+      },
+      {
+        "id": "q08",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.5430029249822634
+      },
+      {
+        "id": "q09",
+        "type": "tag_hit",
+        "precision": 0.7,
+        "recall": 0.7,
+        "ndcg": 0.6812060741152737
+      },
+      {
+        "id": "q10",
+        "type": "tag_hit",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.485813635742251
+      },
+      {
+        "id": "q11",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q12",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q13",
+        "type": "tag_hit",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8200685179888283
+      },
+      {
+        "id": "q14",
+        "type": "tag_hit",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.5022037311331264
+      },
+      {
+        "id": "q15",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.6901935063354876
+      },
+      {
+        "id": "q16",
+        "type": "tag_hit",
+        "precision": 0.2,
+        "recall": 0.2,
+        "ndcg": 0.17947710508581735
+      },
+      {
+        "id": "q17",
+        "type": "tag_miss",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.4631896595828492
+      },
+      {
+        "id": "q18",
+        "type": "tag_miss",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.42650769853316917
+      },
+      {
+        "id": "q19",
+        "type": "tag_miss",
+        "precision": 0.0,
+        "recall": 0.0,
+        "ndcg": 0.0
+      },
+      {
+        "id": "q20",
+        "type": "tag_miss",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.539641393863001
+      },
+      {
+        "id": "q21",
+        "type": "tag_miss",
+        "precision": 0.7,
+        "recall": 0.7,
+        "ndcg": 0.6253338941235216
+      },
+      {
+        "id": "q22",
+        "type": "tag_miss",
+        "precision": 0.1,
+        "recall": 0.1,
+        "ndcg": 0.22009176629808017
+      },
+      {
+        "id": "q23",
+        "type": "tag_miss",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.5100691314582919
+      },
+      {
+        "id": "q24",
+        "type": "tag_miss",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q25",
+        "type": "tag_miss",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.6332196796270029
+      },
+      {
+        "id": "q26",
+        "type": "tag_miss",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8389574121760602
+      },
+      {
+        "id": "q27",
+        "type": "tag_miss",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.6235744328990731
+      },
+      {
+        "id": "q28",
+        "type": "tag_hit",
+        "precision": 0.7,
+        "recall": 0.7777777777777778,
+        "ndcg": 0.8246227765026253
+      },
+      {
+        "id": "q29",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q30",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.75,
+        "ndcg": 0.44229834886928765
+      },
+      {
+        "id": "q31",
+        "type": "tag_hit",
+        "precision": 0.5,
+        "recall": 0.8333333333333334,
+        "ndcg": 0.8573475126545858
+      },
+      {
+        "id": "q32",
+        "type": "tag_hit",
+        "precision": 0.5,
+        "recall": 1.0,
+        "ndcg": 0.7816510974258781
+      },
+      {
+        "id": "q33",
+        "type": "tag_miss",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.6906478832608419
+      },
+      {
+        "id": "q34",
+        "type": "tag_miss",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.31516255047698366
+      }
+    ],
+    "rrf_vec": [
+      {
+        "id": "q01",
+        "type": "tag_hit",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8263333286520083
+      },
+      {
+        "id": "q02",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q03",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q04",
+        "type": "tag_hit",
+        "precision": 0.2,
+        "recall": 0.2,
+        "ndcg": 0.22400556151517553
+      },
+      {
+        "id": "q05",
+        "type": "tag_hit",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.7065443116025598
+      },
+      {
+        "id": "q06",
+        "type": "tag_hit",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.933745776545611
+      },
+      {
+        "id": "q07",
+        "type": "tag_hit",
+        "precision": 0.7,
+        "recall": 0.7,
+        "ndcg": 0.7312625444731047
+      },
+      {
+        "id": "q08",
+        "type": "tag_hit",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.9305687780632227
+      },
+      {
+        "id": "q09",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q10",
+        "type": "tag_hit",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.4642913062995817
+      },
+      {
+        "id": "q11",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q12",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q13",
+        "type": "tag_hit",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.8611375561264454
+      },
+      {
+        "id": "q14",
+        "type": "tag_hit",
+        "precision": 0.7,
+        "recall": 0.7,
+        "ndcg": 0.6929852696575347
+      },
+      {
+        "id": "q15",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.4779671403625728
+      },
+      {
+        "id": "q16",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.24936270394794902
+      },
+      {
+        "id": "q17",
+        "type": "tag_miss",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.3038377318600772
+      },
+      {
+        "id": "q18",
+        "type": "tag_miss",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.2781981696179509
+      },
+      {
+        "id": "q19",
+        "type": "tag_miss",
+        "precision": 0.0,
+        "recall": 0.0,
+        "ndcg": 0.0
+      },
+      {
+        "id": "q20",
+        "type": "tag_miss",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.5199967979955745
+      },
+      {
+        "id": "q21",
+        "type": "tag_miss",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.9363792118010483
+      },
+      {
+        "id": "q22",
+        "type": "tag_miss",
+        "precision": 0.0,
+        "recall": 0.0,
+        "ndcg": 0.0
+      },
+      {
+        "id": "q23",
+        "type": "tag_miss",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.4440973278132557
+      },
+      {
+        "id": "q24",
+        "type": "tag_miss",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q25",
+        "type": "tag_miss",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.605504765619221
+      },
+      {
+        "id": "q26",
+        "type": "tag_miss",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.7799082337019199
+      },
+      {
+        "id": "q27",
+        "type": "tag_miss",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8630152897016883
+      },
+      {
+        "id": "q28",
+        "type": "tag_hit",
+        "precision": 0.7,
+        "recall": 0.7777777777777778,
+        "ndcg": 0.8083286100076827
+      },
+      {
+        "id": "q29",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q30",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.75,
+        "ndcg": 0.45905478457279136
+      },
+      {
+        "id": "q31",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.6666666666666666,
+        "ndcg": 0.7409096387260823
+      },
+      {
+        "id": "q32",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.8,
+        "ndcg": 0.7860137352654724
+      },
+      {
+        "id": "q33",
+        "type": "tag_miss",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.5887498202463202
+      },
+      {
+        "id": "q34",
+        "type": "tag_miss",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.5670429581667766
+      }
+    ],
+    "hybrid": [
+      {
+        "id": "q01",
+        "type": "tag_hit",
+        "precision": 0.7,
+        "recall": 0.7,
+        "ndcg": 0.681660451040628
+      },
+      {
+        "id": "q02",
+        "type": "tag_hit",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.9052116356304493
+      },
+      {
+        "id": "q03",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.6363762929310753
+      },
+      {
+        "id": "q04",
+        "type": "tag_hit",
+        "precision": 0.1,
+        "recall": 0.1,
+        "ndcg": 0.11004588314904008
+      },
+      {
+        "id": "q05",
+        "type": "tag_hit",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.5837154733670049
+      },
+      {
+        "id": "q06",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.39375843764607193
+      },
+      {
+        "id": "q07",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.7019727018777485
+      },
+      {
+        "id": "q08",
+        "type": "tag_hit",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.627507133061656
+      },
+      {
+        "id": "q09",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.42520843362602373
+      },
+      {
+        "id": "q10",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.3282410109263901
+      },
+      {
+        "id": "q11",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q12",
+        "type": "tag_hit",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.9216017310213247
+      },
+      {
+        "id": "q13",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.6531466953037821
+      },
+      {
+        "id": "q14",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.6578986223737446
+      },
+      {
+        "id": "q15",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.30701473034246535
+      },
+      {
+        "id": "q16",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.4288398090337664
+      },
+      {
+        "id": "q17",
+        "type": "tag_miss",
+        "precision": 0.1,
+        "recall": 0.1,
+        "ndcg": 0.11004588314904008
+      },
+      {
+        "id": "q18",
+        "type": "tag_miss",
+        "precision": 0.2,
+        "recall": 0.2,
+        "ndcg": 0.2489083270225946
+      },
+      {
+        "id": "q19",
+        "type": "tag_miss",
+        "precision": 0.1,
+        "recall": 0.1,
+        "ndcg": 0.06943122193677727
+      },
+      {
+        "id": "q20",
+        "type": "tag_miss",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.5107164012496701
+      },
+      {
+        "id": "q21",
+        "type": "tag_miss",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8165901947515999
+      },
+      {
+        "id": "q22",
+        "type": "tag_miss",
+        "precision": 0.0,
+        "recall": 0.0,
+        "ndcg": 0.0
+      },
+      {
+        "id": "q23",
+        "type": "tag_miss",
+        "precision": 0.1,
+        "recall": 0.1,
+        "ndcg": 0.22009176629808017
+      },
+      {
+        "id": "q24",
+        "type": "tag_miss",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q25",
+        "type": "tag_miss",
+        "precision": 0.7,
+        "recall": 0.7,
+        "ndcg": 0.7093753650484099
+      },
+      {
+        "id": "q26",
+        "type": "tag_miss",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.7065443116025598
+      },
+      {
+        "id": "q27",
+        "type": "tag_miss",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8643145546088337
+      },
+      {
+        "id": "q28",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.3333333333333333,
+        "ndcg": 0.21284777692444587
+      },
+      {
+        "id": "q29",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q30",
+        "type": "tag_hit",
+        "precision": 0.2,
+        "recall": 0.5,
+        "ndcg": 0.5855700749881525
+      },
+      {
+        "id": "q31",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.6666666666666666,
+        "ndcg": 0.5636382420621701
+      },
+      {
+        "id": "q32",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.6,
+        "ndcg": 0.7227265726449519
+      },
+      {
+        "id": "q33",
+        "type": "tag_miss",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.24966402870278917
+      },
+      {
+        "id": "q34",
+        "type": "tag_miss",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.2426178552850034
+      }
+    ],
+    "full": [
+      {
+        "id": "q01",
+        "type": "tag_hit",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8389574121760602
+      },
+      {
+        "id": "q02",
+        "type": "tag_hit",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.8611375561264454
+      },
+      {
+        "id": "q03",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q04",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.40853591842579556
+      },
+      {
+        "id": "q05",
+        "type": "tag_hit",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.7917063341896681
+      },
+      {
+        "id": "q06",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.4447551423209717
+      },
+      {
+        "id": "q07",
+        "type": "tag_hit",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.7034066032439746
+      },
+      {
+        "id": "q08",
+        "type": "tag_hit",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.642186726668901
+      },
+      {
+        "id": "q09",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.4440973278132557
+      },
+      {
+        "id": "q10",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.3683756341388872
+      },
+      {
+        "id": "q11",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q12",
+        "type": "tag_hit",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q13",
+        "type": "tag_hit",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8512360941594274
+      },
+      {
+        "id": "q14",
+        "type": "tag_hit",
+        "precision": 0.7,
+        "recall": 0.7,
+        "ndcg": 0.7191184989488184
+      },
+      {
+        "id": "q15",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.48882922182497546
+      },
+      {
+        "id": "q16",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.3030820301798826
+      },
+      {
+        "id": "q17",
+        "type": "tag_miss",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.3570764765963919
+      },
+      {
+        "id": "q18",
+        "type": "tag_miss",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.48882922182497546
+      },
+      {
+        "id": "q19",
+        "type": "tag_miss",
+        "precision": 0.0,
+        "recall": 0.0,
+        "ndcg": 0.0
+      },
+      {
+        "id": "q20",
+        "type": "tag_miss",
+        "precision": 0.4,
+        "recall": 0.4,
+        "ndcg": 0.5271064966405455
+      },
+      {
+        "id": "q21",
+        "type": "tag_miss",
+        "precision": 0.8,
+        "recall": 0.8,
+        "ndcg": 0.8364586133797037
+      },
+      {
+        "id": "q22",
+        "type": "tag_miss",
+        "precision": 0.0,
+        "recall": 0.0,
+        "ndcg": 0.0
+      },
+      {
+        "id": "q23",
+        "type": "tag_miss",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.388244052766991
+      },
+      {
+        "id": "q24",
+        "type": "tag_miss",
+        "precision": 1.0,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q25",
+        "type": "tag_miss",
+        "precision": 0.6,
+        "recall": 0.6,
+        "ndcg": 0.6809047493604335
+      },
+      {
+        "id": "q26",
+        "type": "tag_miss",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.7799082337019199
+      },
+      {
+        "id": "q27",
+        "type": "tag_miss",
+        "precision": 0.9,
+        "recall": 0.9,
+        "ndcg": 0.9363792118010483
+      },
+      {
+        "id": "q28",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.4444444444444444,
+        "ndcg": 0.5050654558782977
+      },
+      {
+        "id": "q29",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 1.0,
+        "ndcg": 1.0
+      },
+      {
+        "id": "q30",
+        "type": "tag_hit",
+        "precision": 0.3,
+        "recall": 0.75,
+        "ndcg": 0.6760236910196463
+      },
+      {
+        "id": "q31",
+        "type": "tag_hit",
+        "precision": 0.5,
+        "recall": 0.8333333333333334,
+        "ndcg": 0.6645057132284412
+      },
+      {
+        "id": "q32",
+        "type": "tag_hit",
+        "precision": 0.4,
+        "recall": 0.8,
+        "ndcg": 0.7972541056822071
+      },
+      {
+        "id": "q33",
+        "type": "tag_miss",
+        "precision": 0.3,
+        "recall": 0.3,
+        "ndcg": 0.30701473034246535
+      },
+      {
+        "id": "q34",
+        "type": "tag_miss",
+        "precision": 0.5,
+        "recall": 0.5,
+        "ndcg": 0.48331483694589444
+      }
+    ]
+  }
+}

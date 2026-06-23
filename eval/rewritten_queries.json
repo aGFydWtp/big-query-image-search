@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "description": "評価34クエリの英語キャプション風リライト。参照の query_rewriter（JP→英語記述）に相当する手動版。gemini-embedding-2 のクロスモーダル text→image 検索／字句チャネルの入力に用いる。",
+    "method": "manual (Claude). 参照は LM Studio の qwen3.5-9b で生成"
+  },
+  "rewrites": {
+    "q01": {"query_en": "a painting of the sea or ocean, a seascape with water and waves", "keywords": ["sea", "ocean", "seascape", "water"]},
+    "q02": {"query_en": "a landscape painting with trees", "keywords": ["landscape", "trees", "forest"]},
+    "q03": {"query_en": "a painting of flowers, a floral still life", "keywords": ["flowers", "floral", "still life"]},
+    "q04": {"query_en": "a painting that includes birds", "keywords": ["bird", "birds"]},
+    "q05": {"query_en": "a painting of boats or ships, sailing vessels on the water", "keywords": ["boat", "boats", "ship", "sailboat"]},
+    "q06": {"query_en": "a landscape with a bridge over water", "keywords": ["bridge", "landscape"]},
+    "q07": {"query_en": "a river landscape, scenery with a river", "keywords": ["river", "landscape", "stream"]},
+    "q08": {"query_en": "an interior room with a window", "keywords": ["window", "interior", "room"]},
+    "q09": {"query_en": "an interior scene with a mirror", "keywords": ["mirror", "interior"]},
+    "q10": {"query_en": "a portrait of a person wearing a hat", "keywords": ["hat", "portrait", "person"]},
+    "q11": {"query_en": "a room with a chandelier", "keywords": ["chandelier", "room", "interior"]},
+    "q12": {"query_en": "a room with a fireplace", "keywords": ["fireplace", "hearth", "room"]},
+    "q13": {"query_en": "a painting of a woman", "keywords": ["woman", "female"]},
+    "q14": {"query_en": "a woman wearing a dress, an elegant gown", "keywords": ["dress", "gown", "woman"]},
+    "q15": {"query_en": "a landscape with hills", "keywords": ["hills", "hill", "landscape"]},
+    "q16": {"query_en": "an interior room with chairs", "keywords": ["chair", "chairs", "interior"]},
+    "q17": {"query_en": "a melancholic, sorrowful, somber and sad painting", "keywords": ["melancholic", "sorrowful", "somber", "sad"]},
+    "q18": {"query_en": "a dramatic, powerful and intense scene", "keywords": ["dramatic", "intense", "powerful"]},
+    "q19": {"query_en": "a nostalgic and wistful atmosphere", "keywords": ["nostalgic", "wistful"]},
+    "q20": {"query_en": "a fantastical, dreamlike and magical painting", "keywords": ["fantastical", "dreamlike", "fantasy"]},
+    "q21": {"query_en": "an elegant, refined and graceful artwork", "keywords": ["elegant", "refined", "graceful"]},
+    "q22": {"query_en": "a solemn, dignified and ceremonial painting", "keywords": ["solemn", "dignified", "ceremonial"]},
+    "q23": {"query_en": "a playful, cheerful and joyful painting", "keywords": ["playful", "cheerful", "joyful"]},
+    "q24": {"query_en": "an impressionist painting in the impressionism style with soft brushstrokes", "keywords": ["impressionist", "impressionism"]},
+    "q25": {"query_en": "a watercolor painting", "keywords": ["watercolor", "watercolour"]},
+    "q26": {"query_en": "a rough sketch, a loose preparatory drawing", "keywords": ["sketch", "drawing", "study"]},
+    "q27": {"query_en": "an art nouveau style artwork with flowing organic lines", "keywords": ["art nouveau", "nouveau"]},
+    "q28": {"query_en": "a scene at dusk, twilight or sunset", "keywords": ["dusk", "twilight", "sunset", "evening"]},
+    "q29": {"query_en": "a snowy landscape covered in snow, a winter scene", "keywords": ["snow", "snowy", "winter"]},
+    "q30": {"query_en": "a night scene, a nocturne", "keywords": ["night", "nocturne", "dark"]},
+    "q31": {"query_en": "stormy, turbulent and rough weather, a storm", "keywords": ["storm", "stormy", "turbulent"]},
+    "q32": {"query_en": "a person reading a book", "keywords": ["reading", "book", "reader"]},
+    "q33": {"query_en": "an urban cityscape with city streets and buildings", "keywords": ["city", "cityscape", "urban", "street"]},
+    "q34": {"query_en": "a painting depicting children", "keywords": ["children", "child", "kids"]}
+  }
+}

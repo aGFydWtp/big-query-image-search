@@ -1,0 +1,340 @@
+{
+  "_meta": {
+    "run_at": "2026-06-23T22:49:11",
+    "label": "bq-gemini-embedding-2",
+    "k": 10,
+    "engine": "bigquery AI.GENERATE_EMBEDDING(gemini-embedding-2-preview, 3072) + VECTOR_SEARCH COSINE",
+    "corpus": "AIC 380 (eval/aic_corpus_ids.json, 参照と同一)",
+    "eval_set": "/Users/haruki/Documents/docker-dev/hr20k/image-search/config/eval_queries.json",
+    "eval_set_generated_at": "2026-06-10",
+    "total_queries": 34
+  },
+  "summary": {
+    "overall": {
+      "precision": 0.5970588235294115,
+      "recall": 0.6450980392156863,
+      "ndcg": 0.642605515087967,
+      "n": 34
+    },
+    "tag_hit": {
+      "precision": 0.6571428571428571,
+      "recall": 0.7349206349206349,
+      "ndcg": 0.7264357731258927,
+      "n": 21
+    },
+    "tag_miss": {
+      "precision": 0.5000000000000001,
+      "recall": 0.5000000000000001,
+      "ndcg": 0.5071874059497801,
+      "n": 13
+    }
+  },
+  "per_query": [
+    {
+      "id": "q01",
+      "query": "海の絵",
+      "type": "tag_hit",
+      "n_relevant": 54,
+      "precision": 0.9,
+      "recall": 0.9,
+      "ndcg": 0.933745776545611
+    },
+    {
+      "id": "q02",
+      "query": "木のある風景",
+      "type": "tag_hit",
+      "n_relevant": 89,
+      "precision": 1.0,
+      "recall": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "id": "q03",
+      "query": "花の絵",
+      "type": "tag_hit",
+      "n_relevant": 52,
+      "precision": 1.0,
+      "recall": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "id": "q04",
+      "query": "鳥がいる絵",
+      "type": "tag_hit",
+      "n_relevant": 13,
+      "precision": 0.3,
+      "recall": 0.3,
+      "ndcg": 0.199306233590118
+    },
+    {
+      "id": "q05",
+      "query": "船の絵",
+      "type": "tag_hit",
+      "n_relevant": 18,
+      "precision": 0.8,
+      "recall": 0.8,
+      "ndcg": 0.7917063341896681
+    },
+    {
+      "id": "q06",
+      "query": "橋のある風景",
+      "type": "tag_hit",
+      "n_relevant": 15,
+      "precision": 0.9,
+      "recall": 0.9,
+      "ndcg": 0.9216017310213247
+    },
+    {
+      "id": "q07",
+      "query": "川の風景",
+      "type": "tag_hit",
+      "n_relevant": 18,
+      "precision": 0.6,
+      "recall": 0.6,
+      "ndcg": 0.6578986223737446
+    },
+    {
+      "id": "q08",
+      "query": "窓のある部屋",
+      "type": "tag_hit",
+      "n_relevant": 31,
+      "precision": 0.8,
+      "recall": 0.8,
+      "ndcg": 0.8572048559638628
+    },
+    {
+      "id": "q09",
+      "query": "鏡のある室内",
+      "type": "tag_hit",
+      "n_relevant": 24,
+      "precision": 0.9,
+      "recall": 0.9,
+      "ndcg": 0.9363792118010483
+    },
+    {
+      "id": "q10",
+      "query": "帽子をかぶった人物",
+      "type": "tag_hit",
+      "n_relevant": 22,
+      "precision": 0.5,
+      "recall": 0.5,
+      "ndcg": 0.43780685607566444
+    },
+    {
+      "id": "q11",
+      "query": "シャンデリアのある部屋",
+      "type": "tag_hit",
+      "n_relevant": 26,
+      "precision": 1.0,
+      "recall": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "id": "q12",
+      "query": "暖炉のある部屋",
+      "type": "tag_hit",
+      "n_relevant": 31,
+      "precision": 1.0,
+      "recall": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "id": "q13",
+      "query": "女性の絵",
+      "type": "tag_hit",
+      "n_relevant": 38,
+      "precision": 0.6,
+      "recall": 0.6,
+      "ndcg": 0.6117748521784964
+    },
+    {
+      "id": "q14",
+      "query": "ドレスを着た女性",
+      "type": "tag_hit",
+      "n_relevant": 23,
+      "precision": 0.7,
+      "recall": 0.7,
+      "ndcg": 0.6848374495230163
+    },
+    {
+      "id": "q15",
+      "query": "丘のある風景",
+      "type": "tag_hit",
+      "n_relevant": 15,
+      "precision": 0.4,
+      "recall": 0.4,
+      "ndcg": 0.3471357245055706
+    },
+    {
+      "id": "q16",
+      "query": "椅子のある部屋",
+      "type": "tag_hit",
+      "n_relevant": 27,
+      "precision": 0.4,
+      "recall": 0.4,
+      "ndcg": 0.36352581989644606
+    },
+    {
+      "id": "q17",
+      "query": "もの悲しい雰囲気の作品",
+      "type": "tag_miss",
+      "n_relevant": 24,
+      "precision": 0.3,
+      "recall": 0.3,
+      "ndcg": 0.25284102718517737
+    },
+    {
+      "id": "q18",
+      "query": "劇的で迫力のある場面",
+      "type": "tag_miss",
+      "n_relevant": 23,
+      "precision": 0.3,
+      "recall": 0.3,
+      "ndcg": 0.2578753740644926
+    },
+    {
+      "id": "q19",
+      "query": "ノスタルジックな雰囲気",
+      "type": "tag_miss",
+      "n_relevant": 28,
+      "precision": 0.1,
+      "recall": 0.1,
+      "ndcg": 0.13886244387355454
+    },
+    {
+      "id": "q20",
+      "query": "幻想的な雰囲気の絵",
+      "type": "tag_miss",
+      "n_relevant": 21,
+      "precision": 0.4,
+      "recall": 0.4,
+      "ndcg": 0.5326208815196265
+    },
+    {
+      "id": "q21",
+      "query": "優雅で上品な作品",
+      "type": "tag_miss",
+      "n_relevant": 64,
+      "precision": 0.9,
+      "recall": 0.9,
+      "ndcg": 0.9052116356304493
+    },
+    {
+      "id": "q22",
+      "query": "厳かな雰囲気の絵",
+      "type": "tag_miss",
+      "n_relevant": 14,
+      "precision": 0.0,
+      "recall": 0.0,
+      "ndcg": 0.0
+    },
+    {
+      "id": "q23",
+      "query": "遊び心のある楽しい絵",
+      "type": "tag_miss",
+      "n_relevant": 16,
+      "precision": 0.2,
+      "recall": 0.2,
+      "ndcg": 0.28371255449703187
+    },
+    {
+      "id": "q24",
+      "query": "印象派の作品",
+      "type": "tag_miss",
+      "n_relevant": 126,
+      "precision": 1.0,
+      "recall": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "id": "q25",
+      "query": "水彩で描かれた作品",
+      "type": "tag_miss",
+      "n_relevant": 20,
+      "precision": 0.6,
+      "recall": 0.6,
+      "ndcg": 0.6331992944486872
+    },
+    {
+      "id": "q26",
+      "query": "ラフなスケッチ",
+      "type": "tag_miss",
+      "n_relevant": 40,
+      "precision": 0.8,
+      "recall": 0.8,
+      "ndcg": 0.6698623505528798
+    },
+    {
+      "id": "q27",
+      "query": "アールヌーヴォー様式の作品",
+      "type": "tag_miss",
+      "n_relevant": 26,
+      "precision": 0.9,
+      "recall": 0.9,
+      "ndcg": 0.8899541168509599
+    },
+    {
+      "id": "q28",
+      "query": "夕暮れどきの情景",
+      "type": "tag_hit",
+      "n_relevant": 9,
+      "precision": 0.6,
+      "recall": 0.6666666666666666,
+      "ndcg": 0.6992056376732811
+    },
+    {
+      "id": "q29",
+      "query": "雪が積もった景色",
+      "type": "tag_hit",
+      "n_relevant": 4,
+      "precision": 0.4,
+      "recall": 1.0,
+      "ndcg": 0.9447176050778178
+    },
+    {
+      "id": "q30",
+      "query": "夜の情景",
+      "type": "tag_hit",
+      "n_relevant": 4,
+      "precision": 0.2,
+      "recall": 0.5,
+      "ndcg": 0.5078961547485289
+    },
+    {
+      "id": "q31",
+      "query": "嵐のような荒れた天気",
+      "type": "tag_hit",
+      "n_relevant": 6,
+      "precision": 0.4,
+      "recall": 0.6666666666666666,
+      "ndcg": 0.5064767203222518
+    },
+    {
+      "id": "q32",
+      "query": "読書をしている人",
+      "type": "tag_hit",
+      "n_relevant": 5,
+      "precision": 0.4,
+      "recall": 0.8,
+      "ndcg": 0.8539316501572937
+    },
+    {
+      "id": "q33",
+      "query": "都会の街並み",
+      "type": "tag_miss",
+      "n_relevant": 11,
+      "precision": 0.5,
+      "recall": 0.5,
+      "ndcg": 0.42331179510529354
+    },
+    {
+      "id": "q34",
+      "query": "子どもが描かれた絵",
+      "type": "tag_miss",
+      "n_relevant": 13,
+      "precision": 0.5,
+      "recall": 0.5,
+      "ndcg": 0.6059848036189867
+    }
+  ]
+}

@@ -102,8 +102,17 @@ gcloud run deploy image-search-api --image <IMAGE> --region <REGION>
 リクエスト:
 
 ```json
-{ "query": "夕焼けの海", "top_k": 12, "signed_url": true }
+{
+  "query": "夕焼けの海",
+  "query_en": "a seascape at sunset or twilight",
+  "top_k": 12,
+  "signed_url": true
+}
 ```
+
+`query_en` は任意。指定時は `query`（生クエリ）と `query_en`（英語リライト）の 2 ベクトル検索を
+RRF(k=60) で融合する。未指定時はサーバ側 Vertex AI（`gemini-2.5-flash`）が英語リライトを自動生成して
+2 系統目に用いる（`REWRITE_ENABLED=false` や生成失敗時は生クエリのみの単一チャネル検索にフォールバック）。
 
 レスポンス:
 

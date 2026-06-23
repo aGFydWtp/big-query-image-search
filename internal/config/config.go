@@ -21,6 +21,16 @@
 //	                  endpoint name "gemini-embedding-2-preview").
 //	SIGNED_URL_EXPIRY (optional) Signed URL validity as a Go duration
 //	                  (e.g. "15m"). Defaults to 15m.
+//	REWRITE_ENABLED   (optional) Enable Vertex AI server-side query rewrite for
+//	                  the rrf_vec RRF channel (see
+//	                  docs/eval-results/comparison-vs-reference.md). Set to
+//	                  "false"/"0" to disable and serve raw-only single-channel
+//	                  search. Defaults to true.
+//	REWRITE_MODEL     (optional) Vertex AI generative model id used by the
+//	                  rewriter. Defaults to "gemini-2.5-flash".
+//	REWRITE_TIMEOUT   (optional) Per-call rewrite timeout as a Go duration.
+//	                  Defaults to 1500ms (rewrite failure degrades to raw-only,
+//	                  so a tight ceiling keeps p99 search latency bounded).
 //
 // No environment-dependent value is hardcoded. Only the shared-contract model
 // object name default and the signed-URL expiry default are code defaults.
@@ -43,6 +53,15 @@ const defaultModel = "gemini_embedding_model"
 // signed URLs when SIGNED_URL_EXPIRY is unset.
 const defaultSignedURLExpiry = 15 * time.Minute
 
+// defaultRewriteModel is the Vertex AI Gemini model used to translate JP
+// queries into English image-search descriptions for the rrf_vec channel.
+const defaultRewriteModel = "gemini-2.5-flash"
+
+// defaultRewriteTimeout caps the rewrite call so a slow Vertex AI response
+// cannot stall the search request. On timeout the handler degrades to
+// raw-only via SQL COALESCE.
+const defaultRewriteTimeout = 1500 * time.Millisecond
+
 // Config holds the resolved runtime configuration.
 type Config struct {
 	// ProjectID is the GCP project id (env PROJECT_ID).
@@ -61,6 +80,14 @@ type Config struct {
 	RunSAEmail string
 	// SignedURLExpiry is the signed URL validity window (env SIGNED_URL_EXPIRY, default 15m).
 	SignedURLExpiry time.Duration
+	// RewriteEnabled toggles the Vertex AI server-side query rewrite for the
+	// rrf_vec RRF channel (env REWRITE_ENABLED, default true).
+	RewriteEnabled bool
+	// RewriteModel is the Vertex AI generative model used by the rewriter
+	// (env REWRITE_MODEL, default "gemini-2.5-flash").
+	RewriteModel string
+	// RewriteTimeout caps each rewrite call (env REWRITE_TIMEOUT, default 1500ms).
+	RewriteTimeout time.Duration
 }
 
 // Load reads configuration from environment variables and validates it.
@@ -79,6 +106,9 @@ func Load() (*Config, error) {
 		envRunSAEmail      = "RUN_SA_EMAIL"
 		envModel           = "MODEL"
 		envSignedURLExpiry = "SIGNED_URL_EXPIRY"
+		envRewriteEnabled  = "REWRITE_ENABLED"
+		envRewriteModel    = "REWRITE_MODEL"
+		envRewriteTimeout  = "REWRITE_TIMEOUT"
 	)
 
 	var problems []string
@@ -118,6 +148,38 @@ func Load() (*Config, error) {
 			problems = append(problems, fmt.Sprintf("invalid %s %q: must be positive", envSignedURLExpiry, raw))
 		} else {
 			cfg.SignedURLExpiry = d
+		}
+	}
+
+	// REWRITE_ENABLED: opt-out toggle for the rrf_vec rewrite channel. Default
+	// is true (rewrite on) so the verified +0.027 nDCG@10 improvement is the
+	// out-of-the-box behavior; explicit "false"/"0" disables.
+	cfg.RewriteEnabled = true
+	if raw := strings.TrimSpace(os.Getenv(envRewriteEnabled)); raw != "" {
+		switch strings.ToLower(raw) {
+		case "false", "0", "no", "off":
+			cfg.RewriteEnabled = false
+		case "true", "1", "yes", "on":
+			cfg.RewriteEnabled = true
+		default:
+			problems = append(problems, fmt.Sprintf("invalid %s %q: expected true/false", envRewriteEnabled, raw))
+		}
+	}
+
+	cfg.RewriteModel = strings.TrimSpace(os.Getenv(envRewriteModel))
+	if cfg.RewriteModel == "" {
+		cfg.RewriteModel = defaultRewriteModel
+	}
+
+	cfg.RewriteTimeout = defaultRewriteTimeout
+	if raw := strings.TrimSpace(os.Getenv(envRewriteTimeout)); raw != "" {
+		d, err := time.ParseDuration(raw)
+		if err != nil {
+			problems = append(problems, fmt.Sprintf("invalid %s %q: %v", envRewriteTimeout, raw, err))
+		} else if d <= 0 {
+			problems = append(problems, fmt.Sprintf("invalid %s %q: must be positive", envRewriteTimeout, raw))
+		} else {
+			cfg.RewriteTimeout = d
 		}
 	}
 

@@ -31,7 +31,7 @@ func newTestBuilder(t *testing.T) *QueryBuilder {
 // an empty value would render invalid SQL.
 func TestNewQueryBuilder_RejectsEmptyConfig(t *testing.T) {
 	cases := []struct {
-		name             string
+		name                  string
 		dataset, model, table string
 	}{
 		{"empty dataset", "", testModel, testTable},
@@ -61,6 +61,8 @@ func TestSingleQuery_RendersInjectedIdentifiers(t *testing.T) {
 		"3072 AS output_dimensionality",
 		"AI.GENERATE_EMBEDDING",
 		"VECTOR_SEARCH",
+		"SUM(1.0 / (60 + rank)) AS rrf_score",
+		"WHERE NULLIF(@query_en, '') IS NOT NULL",
 		"WHERE status = ''",
 	}
 	for _, w := range wants {
@@ -77,22 +79,22 @@ func TestSingleQuery_IsSingleCTEStatement(t *testing.T) {
 	b := newTestBuilder(t)
 	sql := b.SingleQuerySQL()
 
-	if !strings.Contains(sql, "WITH query_embedding AS") {
-		t.Errorf("single-query SQL must use the CTE `WITH query_embedding AS`\n%s", sql)
+	if !strings.Contains(sql, "WITH query_inputs AS") {
+		t.Errorf("single-query SQL must use the CTE `WITH query_inputs AS`\n%s", sql)
 	}
 	// Exactly one statement-terminating semicolon (single query, not split).
 	if n := strings.Count(sql, ";"); n != 1 {
 		t.Errorf("single-query SQL should be a single statement (1 semicolon), got %d\n%s", n, sql)
 	}
-	// The CTE feeds VECTOR_SEARCH via `TABLE query_embedding`.
-	if !strings.Contains(sql, "TABLE query_embedding") {
-		t.Errorf("single-query SQL must join the CTE into VECTOR_SEARCH via `TABLE query_embedding`\n%s", sql)
+	// The embedding CTE feeds VECTOR_SEARCH via `TABLE query_embeddings`.
+	if !strings.Contains(sql, "TABLE query_embeddings") {
+		t.Errorf("single-query SQL must join the CTE into VECTOR_SEARCH via `TABLE query_embeddings`\n%s", sql)
 	}
 }
 
-// TestSingleQuery_PreservesParameterReferences verifies @query/@top_k remain as
-// BigQuery parameter references (bound at execution time by the client), NOT
-// substituted into the rendered SQL.
+// TestSingleQuery_PreservesParameterReferences verifies @query/@query_en/
+// @candidate_k/@top_k remain as BigQuery parameter references (bound at
+// execution time by the client), NOT substituted into the rendered SQL.
 func TestSingleQuery_PreservesParameterReferences(t *testing.T) {
 	b := newTestBuilder(t)
 	sql := b.SingleQuerySQL()
@@ -100,8 +102,14 @@ func TestSingleQuery_PreservesParameterReferences(t *testing.T) {
 	if !strings.Contains(sql, "@query") {
 		t.Errorf("single-query SQL must preserve @query parameter reference\n%s", sql)
 	}
-	if !strings.Contains(sql, "top_k => @top_k") {
-		t.Errorf("single-query SQL must preserve @top_k parameter reference bound to top_k =>\n%s", sql)
+	if !strings.Contains(sql, "@query_en") {
+		t.Errorf("single-query SQL must preserve @query_en parameter reference\n%s", sql)
+	}
+	if !strings.Contains(sql, "top_k => @candidate_k") {
+		t.Errorf("single-query SQL must preserve @candidate_k parameter reference bound to top_k =>\n%s", sql)
+	}
+	if !strings.Contains(sql, "LIMIT @top_k") {
+		t.Errorf("single-query SQL must preserve @top_k parameter reference bound to LIMIT\n%s", sql)
 	}
 }
 
@@ -132,7 +140,7 @@ func TestSingleQuery_ConfigDriven_NoHardcoding(t *testing.T) {
 func TestParameterNames(t *testing.T) {
 	b := newTestBuilder(t)
 	names := b.ParameterNames()
-	want := map[string]bool{"query": true, "top_k": true}
+	want := map[string]bool{"query": true, "query_en": true, "candidate_k": true, "top_k": true}
 	if len(names) != len(want) {
 		t.Fatalf("ParameterNames() = %v, want keys %v", names, want)
 	}

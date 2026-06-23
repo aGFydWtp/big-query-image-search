@@ -11,9 +11,11 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	credentials "cloud.google.com/go/iam/credentials/apiv1"
+	"google.golang.org/genai"
 
 	"github.com/aGFydWtp/big-query-image-search/internal/config"
 	"github.com/aGFydWtp/big-query-image-search/internal/httpapi"
+	"github.com/aGFydWtp/big-query-image-search/internal/rewrite"
 	"github.com/aGFydWtp/big-query-image-search/internal/search"
 	"github.com/aGFydWtp/big-query-image-search/internal/signedurl"
 )
@@ -77,7 +79,33 @@ func buildSearchHandler(ctx context.Context, cfg *config.Config) (http.Handler, 
 		SignBytes:      signedurl.NewIAMSignBytes(ctx, iamClient, cfg.RunSAEmail),
 	})
 
-	return httpapi.NewSearchHandler(searchClient, signGen), nil
+	rewriter, err := buildRewriter(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return httpapi.NewSearchHandler(searchClient, rewriter, signGen), nil
+}
+
+// buildRewriter wires the Vertex AI Gemini query rewriter that supplies the
+// rrf_vec channel (docs/eval-results/comparison-vs-reference.md). When
+// REWRITE_ENABLED=false it returns a Noop so the handler degrades to raw-only
+// single-channel search; otherwise it constructs a genai.Client bound to
+// Vertex AI in the configured project/region using Application Default
+// Credentials (Cloud Run injects the runtime SA).
+func buildRewriter(ctx context.Context, cfg *config.Config) (rewrite.Rewriter, error) {
+	if !cfg.RewriteEnabled {
+		return rewrite.Noop{}, nil
+	}
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		Backend:  genai.BackendVertexAI,
+		Project:  cfg.ProjectID,
+		Location: cfg.Region,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return rewrite.NewVertexRewriter(client.Models, cfg.RewriteModel, cfg.RewriteTimeout), nil
 }
 
 // port resolves the listen port from the PORT env var (Cloud Run convention),

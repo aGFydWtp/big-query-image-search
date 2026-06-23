@@ -39,7 +39,9 @@ const (
 // re-deriving literals.
 const (
 	paramQuery          = "query"           // @query  (single + split embedding)
+	paramQueryEN        = "query_en"        // @query_en (single RRF rewrite channel)
 	paramTopK           = "top_k"           // @top_k  (single + split search)
+	paramCandidateK     = "candidate_k"     // @candidate_k (single RRF per-channel candidates)
 	paramQueryEmbedding = "query_embedding" // @query_embedding (split search only)
 )
 
@@ -93,7 +95,7 @@ func (b *QueryBuilder) SingleQuerySQL() string {
 
 // ParameterNames lists the BigQuery parameter names the single-query path binds.
 func (b *QueryBuilder) ParameterNames() []string {
-	return []string{paramQuery, paramTopK}
+	return []string{paramQuery, paramQueryEN, paramCandidateK, paramTopK}
 }
 
 // splitEmbeddingTemplate is the degraded path statement (1): generate the query

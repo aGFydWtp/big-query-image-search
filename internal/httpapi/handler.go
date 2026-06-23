@@ -6,8 +6,10 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/aGFydWtp/big-query-image-search/internal/result"
+	"github.com/aGFydWtp/big-query-image-search/internal/rewrite"
 	"github.com/aGFydWtp/big-query-image-search/internal/search"
 	"github.com/aGFydWtp/big-query-image-search/internal/signedurl"
 	"github.com/aGFydWtp/big-query-image-search/internal/validation"
@@ -17,7 +19,16 @@ import (
 // implementation is *search.BigQueryClient; tests inject a fake so the handler
 // flow is verified without a live BigQuery connection.
 type searcher interface {
-	Search(ctx context.Context, query string, topK int) ([]search.Row, error)
+	Search(ctx context.Context, query string, queryEN string, topK int) ([]search.Row, error)
+}
+
+// queryRewriter is the seam over the English query rewriter. The handler calls
+// it before search to obtain the second RRF channel (rrf_vec) verified in
+// docs/eval-results/comparison-vs-reference.md (overall nDCG@10 0.643 → 0.670).
+// Rewrite failures are NEVER fatal: the handler degrades to a raw-only search —
+// an empty query_en suppresses the rewrite channel in the SQL query_inputs CTE.
+type queryRewriter interface {
+	Rewrite(ctx context.Context, query string) (string, error)
 }
 
 // signer is the seam for batch signed-URL generation. The production
@@ -34,6 +45,7 @@ type signer interface {
 // per-result signed URLs are generated.
 type searchRequest struct {
 	Query     string `json:"query"`
+	QueryEN   string `json:"query_en"`
 	TopK      *int   `json:"top_k"`
 	SignedURL bool   `json:"signed_url"`
 }
@@ -64,8 +76,9 @@ const (
 
 // searchHandler implements the POST /search endpoint over injectable seams.
 type searchHandlerImpl struct {
-	search searcher
-	sign   signer
+	search  searcher
+	rewrite queryRewriter
+	sign    signer
 	// logger sinks server-side diagnostics (e.g. the internal cause of a 5xx)
 	// that are deliberately withheld from the client response. Never nil after
 	// NewSearchHandler; tests inject a buffer-backed logger to assert the path.
@@ -73,11 +86,17 @@ type searchHandlerImpl struct {
 }
 
 // NewSearchHandler constructs the search endpoint handler from its seams. main
-// supplies the real *search.BigQueryClient and *signedurl.Generator; tests
-// supply fakes. Server-side diagnostics go to slog.Default() (Cloud Run routes
-// stderr to Cloud Logging), so no logger plumbing is required at the call site.
-func NewSearchHandler(s searcher, sg signer) http.Handler {
-	return &searchHandlerImpl{search: s, sign: sg, logger: slog.Default()}
+// supplies the real *search.BigQueryClient, *rewrite.VertexRewriter, and
+// *signedurl.Generator; tests supply fakes. Server-side diagnostics go to
+// slog.Default() (Cloud Run routes stderr to Cloud Logging), so no logger
+// plumbing is required at the call site. A nil rewriter is normalized to
+// rewrite.Noop so the rrf_vec path safely degrades to raw-only search when the
+// rewriter is disabled.
+func NewSearchHandler(s searcher, rw queryRewriter, sg signer) http.Handler {
+	if rw == nil {
+		rw = rewrite.Noop{}
+	}
+	return &searchHandlerImpl{search: s, rewrite: rw, sign: sg, logger: slog.Default()}
 }
 
 // causer is the seam over *search.internalError, which retains the raw BigQuery
@@ -109,7 +128,23 @@ func (h *searchHandlerImpl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := h.search.Search(r.Context(), validated.Query, validated.TopK)
+	// Honor a client-supplied query_en (manual override / eval reproduction);
+	// otherwise call the server-side rewriter to generate the rrf_vec channel.
+	// A rewrite error is logged at warn and degrades to raw-only (an empty
+	// query_en suppresses the rewrite channel in SQL) — never propagated to the
+	// client.
+	queryEN := strings.TrimSpace(req.QueryEN)
+	if queryEN == "" {
+		rewritten, rerr := h.rewrite.Rewrite(r.Context(), validated.Query)
+		if rerr != nil {
+			h.logger.LogAttrs(r.Context(), slog.LevelWarn, "rewrite failed, falling back to raw-only search",
+				slog.String("error", rerr.Error()))
+		} else {
+			queryEN = rewritten
+		}
+	}
+
+	rows, err := h.search.Search(r.Context(), validated.Query, queryEN, validated.TopK)
 	if err != nil {
 		// Record the internal cause server-side ONLY; the client still receives a
 		// generic message with no upstream/internal detail (Req 4.3). Without this

@@ -84,11 +84,13 @@ func NewBigQueryClientSplit(builder *QueryBuilder, runner queryRunner) *BigQuery
 }
 
 // Search executes the parameterized search query and returns the matched rows.
-// query binds @query (STRING) and topK binds @top_k (INT64). The supplied
-// context propagates timeout/cancellation. On failure, the returned error is a
-// generic internal type (ErrQueryTimeout or ErrBigQuery) that does not expose
-// raw BigQuery detail.
-func (c *BigQueryClient) Search(ctx context.Context, query string, topK int) ([]Row, error) {
+// query binds @query (STRING), queryEN binds @query_en (STRING), and topK binds
+// @top_k (INT64). queryEN is optional; an empty value falls back to query in
+// SQL, preserving a valid search while allowing callers to supply the evaluated
+// English rewrite channel for RRF fusion. The supplied context propagates
+// timeout/cancellation. On failure, the returned error is a generic internal
+// type (ErrQueryTimeout or ErrBigQuery) that does not expose raw BigQuery detail.
+func (c *BigQueryClient) Search(ctx context.Context, query string, queryEN string, topK int) ([]Row, error) {
 	// Honor an already-cancelled/expired context before issuing any job.
 	if err := ctx.Err(); err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrQueryTimeout, err)
@@ -97,13 +99,14 @@ func (c *BigQueryClient) Search(ctx context.Context, query string, topK int) ([]
 	if c.split {
 		return c.searchSplit(ctx, query, topK)
 	}
-	return c.searchSingle(ctx, query, topK)
+	return c.searchSingle(ctx, query, queryEN, topK)
 }
 
 // searchSingle runs the default single BigQuery job: the combined embedding +
-// VECTOR_SEARCH query with @query and @top_k bound.
-func (c *BigQueryClient) searchSingle(ctx context.Context, query string, topK int) ([]Row, error) {
-	params := bindParams(c.builder.ParameterNames(), query, int64(topK), nil)
+// VECTOR_SEARCH RRF query with @query, @query_en, @candidate_k, and @top_k
+// bound.
+func (c *BigQueryClient) searchSingle(ctx context.Context, query string, queryEN string, topK int) ([]Row, error) {
+	params := bindParams(c.builder.ParameterNames(), query, queryEN, int64(topK), nil)
 	rows, err := c.runner.Run(ctx, c.builder.SingleQuerySQL(), params)
 	if err != nil {
 		return nil, classifyError(err)
@@ -118,7 +121,7 @@ func (c *BigQueryClient) searchSplit(ctx context.Context, query string, topK int
 	embeddingSQL, searchSQL := c.builder.SplitQuerySQL()
 	embeddingParams, searchParamNames := c.builder.SplitParameterNames()
 
-	embRows, err := c.runner.Run(ctx, embeddingSQL, bindParams(embeddingParams, query, 0, nil))
+	embRows, err := c.runner.Run(ctx, embeddingSQL, bindParams(embeddingParams, query, "", 0, nil))
 	if err != nil {
 		return nil, classifyError(err)
 	}
@@ -130,7 +133,7 @@ func (c *BigQueryClient) searchSplit(ctx context.Context, query string, topK int
 	// is supplied to the search statement via @query_embedding. The runner is
 	// responsible for surfacing the embedding column; for the split path the
 	// search statement binds @query (none), @query_embedding, and @top_k.
-	searchParams := bindParams(searchParamNames, query, int64(topK), embRows)
+	searchParams := bindParams(searchParamNames, query, "", int64(topK), embRows)
 	if err := ctx.Err(); err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrQueryTimeout, err)
 	}
@@ -143,21 +146,33 @@ func (c *BigQueryClient) searchSplit(ctx context.Context, query string, topK int
 
 // bindParams maps the builder-declared parameter names to their runtime values.
 // It binds only the names the builder reports, keeping name fidelity with the
-// embedded SQL (@query, @top_k, @query_embedding). The embeddingRows argument is
-// used only by the split search statement to carry the @query_embedding value.
-func bindParams(names []string, query string, topK int64, embeddingRows []Row) []QueryParam {
+// embedded SQL (@query, @query_en, @candidate_k, @top_k for the single path;
+// @query_embedding for the split path). The embeddingRows argument is used only
+// by the split search statement to carry the @query_embedding value.
+func bindParams(names []string, query string, queryEN string, topK int64, embeddingRows []Row) []QueryParam {
 	params := make([]QueryParam, 0, len(names))
 	for _, n := range names {
 		switch n {
 		case paramQuery:
 			params = append(params, QueryParam{Name: paramQuery, Value: query})
+		case paramQueryEN:
+			params = append(params, QueryParam{Name: paramQueryEN, Value: queryEN})
 		case paramTopK:
 			params = append(params, QueryParam{Name: paramTopK, Value: topK})
+		case paramCandidateK:
+			params = append(params, QueryParam{Name: paramCandidateK, Value: candidateK(topK)})
 		case paramQueryEmbedding:
 			params = append(params, QueryParam{Name: paramQueryEmbedding, Value: embeddingVector(embeddingRows)})
 		}
 	}
 	return params
+}
+
+func candidateK(topK int64) int64 {
+	if topK > 50 {
+		return topK
+	}
+	return 50
 }
 
 // embeddingVector is a placeholder hook for the split path: the embedding vector

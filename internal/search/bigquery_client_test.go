@@ -48,7 +48,7 @@ func TestBigQueryClient_Search_Success(t *testing.T) {
 	fake := &fakeRunner{rows: want}
 	client := NewBigQueryClient(newClientBuilder(t), fake)
 
-	got, err := client.Search(context.Background(), "a red bicycle", 2)
+	got, err := client.Search(context.Background(), "a red bicycle", "a painting of a red bicycle", 2)
 	if err != nil {
 		t.Fatalf("Search returned error: %v", err)
 	}
@@ -63,14 +63,14 @@ func TestBigQueryClient_Search_Success(t *testing.T) {
 }
 
 // TestBigQueryClient_Search_BindsParameters verifies the single-job path binds
-// @query (STRING) and @top_k (INT64) using the builder's parameter names, and
-// runs exactly one job with the single-query SQL.
+// @query, @query_en, @candidate_k, and @top_k using the builder's parameter
+// names, and runs exactly one job with the single-query SQL.
 func TestBigQueryClient_Search_BindsParameters(t *testing.T) {
 	builder := newClientBuilder(t)
 	fake := &fakeRunner{rows: []Row{}}
 	client := NewBigQueryClient(builder, fake)
 
-	if _, err := client.Search(context.Background(), "blue car", 7); err != nil {
+	if _, err := client.Search(context.Background(), "blue car", "a blue car", 7); err != nil {
 		t.Fatalf("Search returned error: %v", err)
 	}
 
@@ -85,8 +85,8 @@ func TestBigQueryClient_Search_BindsParameters(t *testing.T) {
 	for _, p := range fake.gotParams {
 		byName[p.Name] = p.Value
 	}
-	if len(byName) != 2 {
-		t.Fatalf("expected 2 bound params, got %d (%+v)", len(byName), fake.gotParams)
+	if len(byName) != 4 {
+		t.Fatalf("expected 4 bound params, got %d (%+v)", len(byName), fake.gotParams)
 	}
 	q, ok := byName["query"]
 	if !ok {
@@ -94,6 +94,20 @@ func TestBigQueryClient_Search_BindsParameters(t *testing.T) {
 	}
 	if qs, ok := q.(string); !ok || qs != "blue car" {
 		t.Errorf("@query = %v (%T), want string \"blue car\"", q, q)
+	}
+	qen, ok := byName["query_en"]
+	if !ok {
+		t.Fatalf("missing @query_en param, got %+v", fake.gotParams)
+	}
+	if qs, ok := qen.(string); !ok || qs != "a blue car" {
+		t.Errorf("@query_en = %v (%T), want string \"a blue car\"", qen, qen)
+	}
+	cand, ok := byName["candidate_k"]
+	if !ok {
+		t.Fatalf("missing @candidate_k param, got %+v", fake.gotParams)
+	}
+	if ci, ok := cand.(int64); !ok || ci != 50 {
+		t.Errorf("@candidate_k = %v (%T), want int64 50", cand, cand)
 	}
 	k, ok := byName["top_k"]
 	if !ok {
@@ -112,7 +126,7 @@ func TestBigQueryClient_Search_RunnerError_NoLeak(t *testing.T) {
 	fake := &fakeRunner{err: errors.New(rawDetail)}
 	client := NewBigQueryClient(newClientBuilder(t), fake)
 
-	got, err := client.Search(context.Background(), "anything", 5)
+	got, err := client.Search(context.Background(), "anything", "", 5)
 	if err == nil {
 		t.Fatal("expected an error, got nil")
 	}
@@ -140,7 +154,7 @@ func TestBigQueryClient_Search_ContextCancelled(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	got, err := client.Search(ctx, "anything", 5)
+	got, err := client.Search(ctx, "anything", "", 5)
 	if err == nil {
 		t.Fatal("expected an error for cancelled context, got nil")
 	}
@@ -159,7 +173,7 @@ func TestBigQueryClient_Search_RunnerContextError(t *testing.T) {
 	fake := &fakeRunner{err: context.DeadlineExceeded}
 	client := NewBigQueryClient(newClientBuilder(t), fake)
 
-	_, err := client.Search(context.Background(), "anything", 5)
+	_, err := client.Search(context.Background(), "anything", "", 5)
 	if err == nil {
 		t.Fatal("expected an error, got nil")
 	}

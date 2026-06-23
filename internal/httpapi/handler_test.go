@@ -18,18 +18,43 @@ import (
 // fakeSearcher records whether it was called and returns canned rows/error so
 // the handler logic is exercised without a live BigQuery connection.
 type fakeSearcher struct {
-	called    bool
-	gotQuery  string
-	gotTopK   int
-	rows      []search.Row
-	err       error
+	called     bool
+	gotQuery   string
+	gotQueryEN string
+	gotTopK    int
+	rows       []search.Row
+	err        error
 }
 
-func (f *fakeSearcher) Search(_ context.Context, query string, topK int) ([]search.Row, error) {
+func (f *fakeSearcher) Search(_ context.Context, query string, queryEN string, topK int) ([]search.Row, error) {
 	f.called = true
 	f.gotQuery = query
+	f.gotQueryEN = queryEN
 	f.gotTopK = topK
 	return f.rows, f.err
+}
+
+// noopRewriter is a deterministic stand-in for the production rewriter used by
+// tests that don't care about the rrf_vec channel — it returns "" so the SQL
+// falls back to a raw-only search via COALESCE.
+type noopRewriter struct{}
+
+func (noopRewriter) Rewrite(_ context.Context, _ string) (string, error) { return "", nil }
+
+// fakeRewriter records the call and returns canned (rewrite, err) so handler
+// tests can assert both the success path (rewrite forwarded as query_en) and
+// the failure-fallback path (raw-only search even when rewrite errored).
+type fakeRewriter struct {
+	gotQuery string
+	called   bool
+	rewrite  string
+	err      error
+}
+
+func (f *fakeRewriter) Rewrite(_ context.Context, q string) (string, error) {
+	f.called = true
+	f.gotQuery = q
+	return f.rewrite, f.err
 }
 
 // fakeSigner returns one Outcome per input URI, signing every URI to a fixed
@@ -89,7 +114,7 @@ func TestHandler_ValidQueryReturns200WithResults(t *testing.T) {
 		{ImageURI: "gs://b/a.jpg", Distance: 0.1, ContentType: "image/jpeg"},
 		{ImageURI: "gs://b/b.jpg", Distance: 0.2, ContentType: "image/png"},
 	}}
-	h := NewSearchHandler(fs, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
@@ -102,6 +127,9 @@ func TestHandler_ValidQueryReturns200WithResults(t *testing.T) {
 	}
 	if fs.gotQuery != "a dog" {
 		t.Errorf("searcher got query %q, want %q", fs.gotQuery, "a dog")
+	}
+	if fs.gotQueryEN != "" {
+		t.Errorf("searcher got query_en %q, want empty fallback", fs.gotQueryEN)
 	}
 
 	var resp struct {
@@ -131,13 +159,87 @@ func TestHandler_ValidQueryReturns200WithResults(t *testing.T) {
 	}
 }
 
+func TestHandler_PassesEnglishRewriteToSearcher(t *testing.T) {
+	fs := &fakeSearcher{rows: []search.Row{{ImageURI: "gs://b/a.jpg", Distance: 0.1}}}
+	fr := &fakeRewriter{rewrite: "should-not-be-used"}
+	h := NewSearchHandler(fs, fr, &fakeSigner{})
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, newRequest(`{"query":"海の絵","query_en":"a painting of the sea"}`))
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body=%s)", rec.Code, rec.Body.String())
+	}
+	if fs.gotQuery != "海の絵" {
+		t.Errorf("searcher got query %q, want %q", fs.gotQuery, "海の絵")
+	}
+	if fs.gotQueryEN != "a painting of the sea" {
+		t.Errorf("searcher got query_en %q, want %q", fs.gotQueryEN, "a painting of the sea")
+	}
+	if fr.called {
+		t.Error("rewriter must NOT be called when client supplied query_en (manual override)")
+	}
+}
+
+// TestHandler_AutoRewriteSuppliesQueryEN verifies that when the client omits
+// query_en, the handler invokes the server-side rewriter and forwards the
+// generated English description to the searcher as the rrf_vec channel
+// (docs/eval-results/comparison-vs-reference.md: overall +0.027).
+func TestHandler_AutoRewriteSuppliesQueryEN(t *testing.T) {
+	fs := &fakeSearcher{rows: []search.Row{{ImageURI: "gs://b/a.jpg", Distance: 0.1}}}
+	fr := &fakeRewriter{rewrite: "a painting of the sea"}
+	h := NewSearchHandler(fs, fr, &fakeSigner{})
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, newRequest(`{"query":"海の絵"}`))
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body=%s)", rec.Code, rec.Body.String())
+	}
+	if !fr.called {
+		t.Fatal("rewriter was not invoked when client omitted query_en")
+	}
+	if fr.gotQuery != "海の絵" {
+		t.Errorf("rewriter got query %q, want %q", fr.gotQuery, "海の絵")
+	}
+	if fs.gotQueryEN != "a painting of the sea" {
+		t.Errorf("searcher got query_en %q, want %q (rewriter output not forwarded)", fs.gotQueryEN, "a painting of the sea")
+	}
+}
+
+// TestHandler_RewriteFailureFallsBackToRawOnly verifies a rewriter error does
+// NOT fail the request: search still runs with query_en="" so the SQL
+// query_inputs CTE suppresses the rewrite row and collapses to the raw-only
+// single-channel path documented in comparison-vs-reference.md.
+func TestHandler_RewriteFailureFallsBackToRawOnly(t *testing.T) {
+	fs := &fakeSearcher{rows: []search.Row{{ImageURI: "gs://b/a.jpg", Distance: 0.1}}}
+	fr := &fakeRewriter{err: errors.New("rewrite: upstream failure: 503")}
+
+	var logBuf bytes.Buffer
+	logger := slog.New(slog.NewTextHandler(&logBuf, nil))
+	h := &searchHandlerImpl{search: fs, rewrite: fr, sign: &fakeSigner{}, logger: logger}
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, newRequest(`{"query":"海の絵"}`))
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (rewrite failure must not surface to client; body=%s)", rec.Code, rec.Body.String())
+	}
+	if fs.gotQueryEN != "" {
+		t.Errorf("searcher got query_en %q on rewrite failure, want empty (raw-only fallback)", fs.gotQueryEN)
+	}
+	if !strings.Contains(logBuf.String(), "rewrite failed") {
+		t.Errorf("server-side log missing rewrite-failure warning; got: %s", logBuf.String())
+	}
+}
+
 // TestHandler_SignedURLRequestedFillsURL verifies signed_url=true populates the
 // signed_url field on each result via the signer (Req 1.2, 3.2).
 func TestHandler_SignedURLRequestedFillsURL(t *testing.T) {
 	fs := &fakeSearcher{rows: []search.Row{
 		{ImageURI: "gs://b/a.jpg", Distance: 0.1},
 	}}
-	h := NewSearchHandler(fs, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"cat","signed_url":true}`))
@@ -165,7 +267,7 @@ func TestHandler_SignedURLRequestedFillsURL(t *testing.T) {
 // 400 and the searcher is NOT invoked (Req 4.1).
 func TestHandler_EmptyQueryReturns400AndSkipsSearch(t *testing.T) {
 	fs := &fakeSearcher{}
-	h := NewSearchHandler(fs, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"   "}`))
@@ -183,7 +285,7 @@ func TestHandler_EmptyQueryReturns400AndSkipsSearch(t *testing.T) {
 // with the common error structure and does not run search.
 func TestHandler_MalformedBodyReturns400(t *testing.T) {
 	fs := &fakeSearcher{}
-	h := NewSearchHandler(fs, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":`))
@@ -203,7 +305,7 @@ func TestHandler_MalformedBodyReturns400(t *testing.T) {
 func TestHandler_InternalErrorReturns5xxNoDetailLeak(t *testing.T) {
 	const rawDetail = "raw bq detail XYZ"
 	fs := &fakeSearcher{err: errors.New(rawDetail)}
-	h := NewSearchHandler(fs, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
@@ -240,7 +342,7 @@ func TestHandler_InternalErrorLogsCauseServerSideOnly(t *testing.T) {
 
 	var logBuf bytes.Buffer
 	logger := slog.New(slog.NewTextHandler(&logBuf, &slog.HandlerOptions{Level: slog.LevelInfo}))
-	h := &searchHandlerImpl{search: fs, sign: &fakeSigner{}, logger: logger}
+	h := &searchHandlerImpl{search: fs, rewrite: noopRewriter{}, sign: &fakeSigner{}, logger: logger}
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
@@ -273,7 +375,7 @@ func TestHandler_InternalErrorLogsPlainError(t *testing.T) {
 
 	var logBuf bytes.Buffer
 	logger := slog.New(slog.NewTextHandler(&logBuf, nil))
-	h := &searchHandlerImpl{search: fs, sign: &fakeSigner{}, logger: logger}
+	h := &searchHandlerImpl{search: fs, rewrite: noopRewriter{}, sign: &fakeSigner{}, logger: logger}
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
@@ -293,7 +395,7 @@ func TestHandler_InternalErrorLogsPlainError(t *testing.T) {
 // {"results":[]} (a non-null empty array) per Req 4.4 robustness.
 func TestHandler_ZeroRowsReturnsEmptyArray(t *testing.T) {
 	fs := &fakeSearcher{rows: nil}
-	h := NewSearchHandler(fs, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"nothing matches"}`))
@@ -319,7 +421,7 @@ func TestHandler_SignerPartialFailureStillReturns200(t *testing.T) {
 		{ImageURI: "gs://b/bad.jpg", Distance: 0.2},
 	}}
 	signer := &fakeSigner{failURIs: map[string]bool{"gs://b/bad.jpg": true}}
-	h := NewSearchHandler(fs, signer)
+	h := NewSearchHandler(fs, nil, signer)
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"x","signed_url":true}`))

@@ -202,11 +202,14 @@ SQL
    ```bash
    curl -s -X POST localhost:8080/search \
      -H 'Content-Type: application/json' \
-     -d '{"query":"cat","top_k":5}'
+     -d '{"query":"cat","query_en":"a painting of a cat","top_k":5}'
    # 期待する 200 ボディ形:
    # {"results":[{"image_uri":"gs://.../001.jpg","score":0.87,"content_type":"image/jpeg"}]}
    # signed_url:true を付けた場合のみ各結果に "signed_url" が付加されうる（下記 IAM 前提参照）
    ```
+
+   `query_en` は任意。指定時は生クエリと英語リライトの 2 系統 `VECTOR_SEARCH` を
+   RRF(k=60、各系統候補は `max(top_k, 50)`) で融合する。未指定時は生クエリでフォールバックする。
 
 5. 入力検証パス（ライブ BigQuery 不要・400 を返す）:
 

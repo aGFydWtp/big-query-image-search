@@ -34,41 +34,36 @@ func TestFormat_ScoreIsOneMinusDistance(t *testing.T) {
 	}
 }
 
-// distance ASC == score DESC == most similar first (Req 1.4, 3.4).
-func TestFormat_SortsByDistanceAscendingScoreDescending(t *testing.T) {
-	// Intentionally out of order.
+// Format preserves the BigQuery row order (the search SQL already orders by
+// rrf_score DESC, distance ASC — the RRF fusion rank). The formatter MUST NOT
+// re-sort by distance, otherwise the RRF ranking is discarded whenever the
+// rewrite channel diverges from raw distance order (Req 1.4, 3.4).
+func TestFormat_PreservesBigQueryRowOrder(t *testing.T) {
+	// Rows as BigQuery returns them in RRF fusion order, which need NOT be
+	// monotonic in distance: a smaller-distance row can rank LOWER when the
+	// other channel disagrees. A distance-based re-sort would reorder these.
 	rows := []search.Row{
-		{ImageURI: "gs://b/mid.jpg", Distance: 0.5},
-		{ImageURI: "gs://b/far.jpg", Distance: 1.2},
-		{ImageURI: "gs://b/near.jpg", Distance: 0.05},
+		{ImageURI: "gs://b/first.jpg", Distance: 0.5},
+		{ImageURI: "gs://b/second.jpg", Distance: 0.05}, // smaller distance, but RRF-ranked 2nd
+		{ImageURI: "gs://b/third.jpg", Distance: 0.3},
 	}
 
 	got := Format(rows)
 
-	wantOrder := []string{"gs://b/near.jpg", "gs://b/mid.jpg", "gs://b/far.jpg"}
+	wantOrder := []string{"gs://b/first.jpg", "gs://b/second.jpg", "gs://b/third.jpg"}
 	if len(got) != len(wantOrder) {
 		t.Fatalf("expected %d results, got %d", len(wantOrder), len(got))
 	}
 	for i, want := range wantOrder {
 		if got[i].ImageURI != want {
-			t.Errorf("result[%d].image_uri = %q, want %q", i, got[i].ImageURI, want)
+			t.Errorf("result[%d].image_uri = %q, want %q (formatter must preserve BigQuery RRF order, not re-sort by distance)",
+				i, got[i].ImageURI, want)
 		}
 	}
 
-	// Verify score is strictly descending (most similar first).
-	for i := 1; i < len(got); i++ {
-		if got[i-1].Score < got[i].Score {
-			t.Errorf("scores not descending: result[%d].Score=%v < result[%d].Score=%v",
-				i-1, got[i-1].Score, i, got[i].Score)
-		}
-	}
-
-	// near: 1-0.05=0.95, mid: 1-0.5=0.5, far: 1-1.2=-0.2
-	if !almostEqual(got[0].Score, 0.95) {
-		t.Errorf("near score = %v, want 0.95", got[0].Score)
-	}
-	if !almostEqual(got[2].Score, -0.2) {
-		t.Errorf("far score = %v, want -0.2", got[2].Score)
+	// score is still 1 - distance per row, regardless of position.
+	if !almostEqual(got[1].Score, 0.95) {
+		t.Errorf("second row score = %v, want 0.95 (1 - 0.05)", got[1].Score)
 	}
 }
 

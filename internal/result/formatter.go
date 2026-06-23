@@ -2,14 +2,13 @@
 // contract owned by this spec (image-search-api).
 //
 // The formatter (Format) converts each search.Row into a SearchResult,
-// translating the raw COSINE distance into a similarity score and ordering
-// results most-similar-first. Signed URL population is deliberately out of
-// scope here: it is filled on demand by the handler/signed-URL generator.
+// translating the raw COSINE distance into a similarity score and preserving
+// the order BigQuery returned (the RRF fusion rank). Signed URL population is
+// deliberately out of scope here: it is filled on demand by the
+// handler/signed-URL generator.
 package result
 
 import (
-	"sort"
-
 	"github.com/aGFydWtp/big-query-image-search/internal/search"
 )
 
@@ -29,9 +28,13 @@ type SearchResult struct {
 // Format converts BigQuery search rows into the response contract.
 //
 //   - score = 1 - distance (cosine similarity; higher score = more similar).
-//   - Results are sorted by distance ascending (== score descending == most
-//     similar first). A stable sort guarantees deterministic ordering for rows
-//     with equal distance.
+//   - Row order is PRESERVED as BigQuery returned it. The search SQL already
+//     orders by rrf_score DESC, distance ASC (the RRF fusion rank), so the
+//     formatter MUST NOT re-sort by distance: doing so would discard the RRF
+//     ranking whenever the rewrite channel diverges from raw distance order
+//     (i.e. exactly when the rrf_vec channel adds value). For the single-channel
+//     fallback the two orders coincide, so preserving SQL order is correct in
+//     both cases.
 //   - content_type is carried through as an optional field.
 //   - signed_url is left empty; the handler populates it on demand.
 //   - For 0 (or nil) rows, an empty NON-NIL slice is returned so JSON encodes
@@ -45,11 +48,6 @@ func Format(rows []search.Row) []SearchResult {
 			ContentType: row.ContentType,
 		})
 	}
-
-	// score descending == distance ascending == most similar first.
-	sort.SliceStable(results, func(i, j int) bool {
-		return results[i].Score > results[j].Score
-	})
 
 	return results
 }

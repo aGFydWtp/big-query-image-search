@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>データ登録と検索のフロー｜big-query-image-search</title>
+<style>
+  :root {
+    --bg: #0f1218;
+    --panel: #171b24;
+    --panel-2: #1d2330;
+    --ink: #e6e9ef;
+    --muted: #9aa4b2;
+    --line: #2a3140;
+    --ingest: #4ade80;
+    --ingest-dim: #14532d;
+    --search: #60a5fa;
+    --search-dim: #1e3a5f;
+    --accent: #fbbf24;
+    --code-bg: #0b0e14;
+    --shadow: 0 6px 24px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    line-height: 1.7; padding: 0 0 80px;
+  }
+  header {
+    padding: 48px 24px 32px; text-align: center;
+    background: radial-gradient(1200px 400px at 50% -120px, #1c2433 0%, var(--bg) 70%);
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: .01em; }
+  header p { margin: 4px 0; color: var(--muted); font-size: 15px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  .legend { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .dot.i { background: var(--ingest); }
+  .dot.s { background: var(--search); }
+
+  h2.section { font-size: 22px; margin: 56px 0 8px; display: flex; align-items: center; gap: 12px; }
+  h2.section .tag {
+    font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: .08em;
+  }
+  h2.section.ingest .tag { background: var(--ingest-dim); color: var(--ingest); }
+  h2.section.search .tag { background: var(--search-dim); color: var(--search); }
+  .section-lead { color: var(--muted); margin: 0 0 28px; font-size: 15px; }
+
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    position: relative; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px 20px 18px 64px; box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+  .step .num {
+    position: absolute; left: 16px; top: 18px; width: 34px; height: 34px;
+    border-radius: 9px; display: grid; place-items: center; font-weight: 700; font-size: 15px;
+  }
+  .ingest .step .num { background: var(--ingest-dim); color: var(--ingest); border: 1px solid #2c6b43; }
+  .search .step .num { background: var(--search-dim); color: var(--search); border: 1px solid #2e5a8a; }
+  .step h3 { margin: 0 0 4px; font-size: 16px; }
+  .step .desc { color: var(--muted); font-size: 14px; margin: 0; }
+  .step .desc code, .pillar code, .contract li code, .note code { color: var(--ink); background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  .step .meta { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-size: 12px; padding: 3px 9px; border-radius: 7px; background: var(--panel-2);
+    border: 1px solid var(--line); color: var(--ink); font-family: "SF Mono", ui-monospace, Menlo, monospace;
+  }
+  .chip.file { color: var(--accent); }
+  .arrow { text-align: center; color: var(--line); font-size: 20px; line-height: 1; margin: -6px 0 8px; }
+
+  .codeblock {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; margin: 12px 0 2px; overflow-x: auto; white-space: pre;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 12.5px; line-height: 1.6;
+  }
+  .codeblock .k { color: #c792ea; }
+  .codeblock .f { color: #82aaff; }
+  .codeblock .c { color: #5c6773; }
+  .codeblock .str { color: #c3e88d; }
+
+  .note {
+    background: var(--panel-2); border-left: 3px solid var(--accent); border-radius: 8px;
+    padding: 12px 16px; margin: 14px 0; font-size: 13.5px; color: var(--ink);
+  }
+  .note b { color: var(--accent); }
+
+  .pillars { display: flex; gap: 12px; flex-wrap: wrap; margin: 20px 0 0; }
+  .pillar { flex: 1 1 220px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .pillar h4 { margin: 0 0 6px; font-size: 14px; color: var(--accent); }
+  .pillar p { margin: 0; font-size: 13px; color: var(--muted); }
+
+  .contract {
+    margin-top: 48px; background: linear-gradient(180deg, #14253a 0%, var(--panel) 100%);
+    border: 1px solid #2e5a8a; border-radius: 14px; padding: 24px;
+  }
+  .contract h3 { margin: 0 0 10px; color: var(--search); }
+  .contract ul { margin: 0; padding-left: 20px; color: var(--ink); font-size: 14px; }
+  .contract li { margin: 6px 0; }
+
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 56px; }
+
+  @media (max-width: 720px) {
+    .step { padding-left: 20px; }
+    .step .num { position: static; margin-bottom: 8px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>データ登録と検索のフロー</h1>
+  <p>テキスト → 画像 セマンティック検索システム（GCP / BigQuery ネイティブ）</p>
+  <p style="font-size:13px;">取込はバッチ（純 SQL）、検索はリクエスト時に BigQuery で実行。常駐の埋め込みサービスを持たない。</p>
+  <div class="legend">
+    <span><i class="dot i"></i>データ登録（バッチ取込）</span>
+    <span><i class="dot s"></i>検索（Cloud Run API）</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="pillars">
+    <div class="pillar">
+      <h4>単一ベクトル空間</h4>
+      <p>取込・検索の両方で同じ <code>gemini-embedding-2-preview</code>・同じ 3072 次元を使い、画像とテキストを同じ空間に埋め込む。これが検索精度の前提。</p>
+    </div>
+    <div class="pillar">
+      <h4>BigQuery に集約</h4>
+      <p>埋め込み生成（<code>AI.GENERATE_EMBEDDING</code>）も近傍探索（<code>VECTOR_SEARCH</code>）も BigQuery 内で実行。専用サービスが不要。</p>
+    </div>
+    <div class="pillar">
+      <h4>共有契約テーブル</h4>
+      <p><code>image_embeddings</code>（3072 次元 / COSINE）が取込と検索をつなぐ唯一の接点。スキーマ変更は両者の再検証トリガー。</p>
+    </div>
+  </div>
+
+  <!-- ============ 登録フロー ============ -->
+  <h2 class="section ingest"><span class="tag">登録</span>データ登録（バッチ取込）フロー</h2>
+  <p class="section-lead">画像を GCS に置き、純 SQL を実行順に流すだけで埋め込みが生成され、検索対象になる。① だけが Python スクリプト、②〜⑥ はすべて BigQuery の SQL（<code style="color:var(--accent)">docs/runbook.md</code> の順）。</p>
+
+  <div class="flow ingest">
+
+    <div class="step">
+      <div class="num">1</div>
+      <h3>画像を GCS バケットへ投入</h3>
+      <p class="desc">Art Institute of Chicago（AIC）の Public Domain 画像を API 経由で取得し、画像バケットの <code>aic-seed/</code> 配下へアップロードする使い捨てシーダー。カラフル・絵画系・画像ありで絞り込み、既存オブジェクトはスキップ。</p>
+      <div class="meta">
+        <span class="chip file">scripts/aic_seed.py</span>
+        <span class="chip">AIC API → GCS</span>
+        <span class="chip">gs://&lt;bucket&gt;/aic-seed/aic-&lt;id&gt;.jpg</span>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+
+    <div class="step">
+      <div class="num">2</div>
+      <h3>Object Table 作成（GCS 画像の論理ビュー）</h3>
+      <p class="desc">BigLake 接続経由で GCS 上の画像オブジェクトを BigQuery の列（uri / content_type / size 等）として参照可能にする外部テーブル。<code>CREATE OR REPLACE</code> で冪等。</p>
+      <div class="meta">
+        <span class="chip file">sql/object_table.sql</span>
+        <span class="chip">EXTERNAL TABLE image_object_table</span>
+        <span class="chip">object_metadata = 'SIMPLE'</span>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+
+    <div class="step">
+      <div class="num">3</div>
+      <h3>リモートモデル作成（埋め込みモデルの参照）</h3>
+      <p class="desc">Vertex AI の <code>gemini-embedding-2-preview</code> を BigQuery から呼ぶためのリモートモデル。オブジェクト名 <code>gemini_embedding_model</code> は検索 API も同一参照する共有契約。Terraform 管理外の SQL 資産。</p>
+      <div class="meta">
+        <span class="chip file">sql/remote_model.sql</span>
+        <span class="chip">MODEL gemini_embedding_model</span>
+        <span class="chip">ENDPOINT = gemini-embedding-2-preview</span>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+
+    <div class="step">
+      <div class="num">4</div>
+      <h3>embeddings テーブル作成（共有契約スキーマ）</h3>
+      <p class="desc">埋め込みの格納先。<code>image_uri</code>（論理一意キー）・<code>embedding</code>（3072 次元）・<code>content_type</code>・<code>generated_at</code>。<code>CREATE TABLE IF NOT EXISTS</code> で既存データを破壊しない。</p>
+      <div class="meta">
+        <span class="chip file">sql/embeddings_table.sql</span>
+        <span class="chip">TABLE image_embeddings</span>
+        <span class="chip">ARRAY&lt;FLOAT64&gt; 次元=3072</span>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+
+    <div class="step">
+      <div class="num">5</div>
+      <h3>埋め込みを生成して差分投入（取込の心臓部）</h3>
+      <p class="desc">Object Table の画像に <code>AI.GENERATE_EMBEDDING</code> を適用してベクトル化し、<code>MERGE … WHEN NOT MATCHED</code> で<b style="color:var(--ingest)">未登録の URI だけ</b>を投入。再実行しても重複しない（冪等）。成功行・3072 次元・画像 MIME のみ通す。</p>
+      <div class="codeblock"><span class="c">-- generate_embeddings.sql（要点）</span>
+<span class="k">MERGE</span> image_embeddings <span class="k">AS</span> tgt
+<span class="k">USING</span> (
+  <span class="k">SELECT</span> src.uri <span class="k">AS</span> image_uri, src.embedding, src.content_type
+  <span class="k">FROM</span> <span class="f">AI.GENERATE_EMBEDDING</span>(
+    <span class="k">MODEL</span> gemini_embedding_model,
+    <span class="k">TABLE</span> image_object_table,
+    <span class="k">STRUCT</span>(<span class="str">3072</span> <span class="k">AS</span> output_dimensionality))
+  <span class="k">WHERE</span> src.status = <span class="str">''</span>                  <span class="c">-- 成功行のみ</span>
+    <span class="k">AND</span> <span class="f">ARRAY_LENGTH</span>(src.embedding) = <span class="str">3072</span>
+    <span class="k">AND</span> src.content_type <span class="k">LIKE</span> <span class="str">'image/%'</span>
+) <span class="k">AS</span> src <span class="k">ON</span> tgt.image_uri = src.image_uri
+<span class="k">WHEN NOT MATCHED THEN INSERT</span> (...);      <span class="c">-- 既存 URI は再投入しない</span></div>
+      <div class="meta">
+        <span class="chip file">sql/generate_embeddings.sql</span>
+        <span class="chip">AI.GENERATE_EMBEDDING + MERGE</span>
+        <span class="chip">スケジュールド/手動どちらでも可</span>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+
+    <div class="step">
+      <div class="num">6</div>
+      <h3>VECTOR INDEX 作成（近傍探索の高速化）</h3>
+      <p class="desc"><code>embedding</code> 列に IVF・COSINE のベクトルインデックスを張る。データ量が約 10MB 未満の間は未 populate で、その時はブルートフォース探索にフォールバック。新規行は BigQuery がマネージドに非同期更新（手動再構築不要）。</p>
+      <div class="meta">
+        <span class="chip file">sql/vector_index.sql</span>
+        <span class="chip">image_embeddings_idx</span>
+        <span class="chip">index_type=IVF / distance_type=COSINE</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note">
+    <b>冪等性がカギ：</b> ②③④⑥ は <code>OR REPLACE</code> / <code>IF NOT EXISTS</code>、⑤ は <code>MERGE</code> による差分投入。画像を追加したら ①（投入）→ ⑤（埋め込み生成）を回すだけで、既存分には触れず新規分だけが検索対象に加わる。
+  </div>
+
+  <!-- ============ 検索フロー ============ -->
+  <h2 class="section search"><span class="tag">検索</span>検索フロー（Cloud Run API）</h2>
+  <p class="section-lead">自然言語クエリを <code style="color:var(--search)">POST /search</code> に送ると、Cloud Run 上の Go サービスがまず（任意で）Vertex AI Gemini で英語リライトを生成し、続いて BigQuery で「2 系統のクエリ埋め込み生成 → <code>VECTOR_SEARCH</code> ×2 → RRF 融合」を<b>1 つのジョブ</b>として実行し、類似画像を返す。検索 UI（SPA）は同サービスに同梱され同一オリジンで配信されるため CORS 設定は不要。</p>
+
+  <div class="flow search">
+
+    <div class="step">
+      <div class="num">1</div>
+      <h3>リクエスト受付とバリデーション</h3>
+      <p class="desc">Web UI（SPA）またはクライアントが <code>{ query, query_en?, top_k?, signed_url? }</code> を送信。BigQuery に触れる前に検証し、空クエリや不正な top_k は <code>400 invalid_request</code> で弾く（無駄なジョブを発行しない）。<code>query_en</code>（英語リライト）は任意で、指定時はそれを優先し ② をスキップする。</p>
+      <div class="meta">
+        <span class="chip file">internal/httpapi/handler.go</span>
+        <span class="chip">POST /search</span>
+        <span class="chip file">internal/validation/validation.go</span>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+
+    <div class="step">
+      <div class="num">2</div>
+      <h3>英語リライト生成（任意・rrf_vec チャネル）</h3>
+      <p class="desc"><code>query_en</code> 未指定かつ <code>REWRITE_ENABLED=true</code>（既定）のとき、Vertex AI Gemini（<code>gemini-2.5-flash</code>）で日本語クエリを英語の画像説明に変換し、RRF の 2 系統目（rrf_vec チャネル）に用いる。<b>失敗・タイムアウトは非致命</b>：warn ログのみ記録し、英語リライトなし（生クエリのみ）の単一チャネル検索にフォールバックする（5xx にしない）。<code>REWRITE_ENABLED=false</code> では <code>Noop</code> となり Vertex AI を呼ばない。</p>
+      <div class="codeblock"><span class="c">// internal/rewrite/rewriter.go（要点）</span>
+resp := client.<span class="f">GenerateContent</span>(ctx, <span class="str">"gemini-2.5-flash"</span>, prompt, cfg)
+<span class="c">// temperature=0 / MaxOutputTokens=96（短く決定的に）</span>
+<span class="c">// 既定タイムアウト 1500ms 超過時は raw-only にフォールバック</span></div>
+      <div class="meta">
+        <span class="chip file">internal/rewrite/rewriter.go</span>
+        <span class="chip">Vertex AI / gemini-2.5-flash</span>
+        <span class="chip">REWRITE_ENABLED / REWRITE_TIMEOUT</span>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+
+    <div class="step">
+      <div class="num">3</div>
+      <h3>検索 SQL を 1 ジョブで実行（2 系統 + RRF 融合）</h3>
+      <p class="desc">生クエリ <code>@query</code> と英語リライト <code>@query_en</code> を <code>AI.GENERATE_EMBEDDING</code> で各 3072 次元にベクトル化し（取込と同一モデル・同一次元）、<code>VECTOR_SEARCH</code> を 2 系統ぶん実行。各系統の順位を <b>RRF（k=60）</b>で融合し <code>rrf_score</code> 降順に並べて <code>top_k</code> 件返す。<code>@query_en</code> が空なら rewrite 行は生成されず raw 単一チャネルに縮約（埋め込み・探索とも 1 回）。各系統の候補数は <code>@candidate_k = max(top_k, 50)</code>。識別子は config 注入、値はパラメータバインド。</p>
+      <div class="codeblock"><span class="c">-- internal/search/templates/search.sql（要点）</span>
+<span class="k">WITH</span> query_inputs <span class="k">AS</span> (
+  <span class="k">SELECT</span> <span class="str">'raw'</span> <span class="k">AS</span> source, <span class="f">@query</span> <span class="k">AS</span> content
+  <span class="k">UNION ALL</span>
+  <span class="k">SELECT</span> <span class="str">'rewrite'</span>, <span class="f">@query_en</span> <span class="k">FROM</span> <span class="f">UNNEST</span>([<span class="str">1</span>])
+  <span class="k">WHERE</span> <span class="f">NULLIF</span>(<span class="f">@query_en</span>, <span class="str">''</span>) <span class="k">IS NOT NULL</span>),  <span class="c">-- 空なら単一チャネル</span>
+query_embeddings <span class="k">AS</span> (
+  <span class="k">SELECT</span> source, embedding <span class="k">FROM</span> <span class="f">AI.GENERATE_EMBEDDING</span>(
+    <span class="k">MODEL</span> gemini_embedding_model, <span class="k">TABLE</span> query_inputs,
+    <span class="k">STRUCT</span>(<span class="str">3072</span> <span class="k">AS</span> output_dimensionality)) <span class="k">WHERE</span> status = <span class="str">''</span>),
+vector_matches <span class="k">AS</span> (
+  <span class="k">SELECT</span> query.source, base.image_uri, base.content_type, distance,
+    <span class="f">ROW_NUMBER</span>() <span class="k">OVER</span> (<span class="k">PARTITION BY</span> query.source <span class="k">ORDER BY</span> distance) <span class="k">AS</span> rank
+  <span class="k">FROM</span> <span class="f">VECTOR_SEARCH</span>(<span class="k">TABLE</span> image_embeddings, <span class="str">'embedding'</span>,
+    <span class="k">TABLE</span> query_embeddings, top_k => <span class="f">@candidate_k</span>, distance_type => <span class="str">'COSINE'</span>)),
+rrf <span class="k">AS</span> (
+  <span class="k">SELECT</span> image_uri, <span class="f">ANY_VALUE</span>(content_type) <span class="k">AS</span> content_type,
+    <span class="f">MIN</span>(distance) <span class="k">AS</span> distance, <span class="f">SUM</span>(<span class="str">1.0</span> / (<span class="str">60</span> + rank)) <span class="k">AS</span> rrf_score
+  <span class="k">FROM</span> vector_matches <span class="k">GROUP BY</span> image_uri)
+<span class="k">SELECT</span> image_uri, content_type, distance <span class="k">FROM</span> rrf
+<span class="k">ORDER BY</span> rrf_score <span class="k">DESC</span>, distance <span class="k">ASC</span> <span class="k">LIMIT</span> <span class="f">@top_k</span>;</div>
+      <div class="meta">
+        <span class="chip file">internal/search/query_builder.go</span>
+        <span class="chip file">internal/search/bigquery_client.go</span>
+        <span class="chip">単一ジョブ / RRF k=60</span>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+
+    <div class="step">
+      <div class="num">4</div>
+      <h3>結果の整形（距離 → 類似スコア）</h3>
+      <p class="desc">各行を <code>score = 1 - distance</code>（COSINE 類似度、高いほど近い）に変換。<b>並び順は BigQuery の返却順（RRF 融合順）をそのまま保持</b>し、formatter は distance で並べ替えない（再ソートすると 2 系統時に RRF ランキングが失われるため）。0 件でも <code>null</code> でなく <code>[]</code> を返す。</p>
+      <div class="meta">
+        <span class="chip file">internal/result/formatter.go</span>
+        <span class="chip">score = 1 - distance</span>
+        <span class="chip">RRF 順を保持（再ソートしない）</span>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+
+    <div class="step">
+      <div class="num">5</div>
+      <h3>署名付き URL を付与（任意）</h3>
+      <p class="desc"><code>signed_url: true</code> のときのみ、ヒットした GCS オブジェクトに短命の V4 署名付き URL を発行。秘密鍵を持たず、IAM Credentials の <code>signBlob</code> に署名を委譲（キーレス）。1 件の失敗は他に波及せず、その項目だけ URL を省く。署名対象は設定された画像バケットに限定。</p>
+      <div class="meta">
+        <span class="chip file">internal/signedurl/generator.go</span>
+        <span class="chip">V4 署名 / IAM signBlob（鍵レス）</span>
+        <span class="chip">画像バケットのみ署名</span>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+
+    <div class="step">
+      <div class="num">6</div>
+      <h3>JSON レスポンス返却 → UI 描画</h3>
+      <p class="desc"><code>{ "results": [ { image_uri, score, content_type?, signed_url? }, … ] }</code> を 200 で返す。エラーは内部原因をサーバログにのみ記録し、クライアントには汎用メッセージを返す（内部詳細を漏らさない）。SPA はこれを受けてグリッド表示・ライトボックス表示する。</p>
+      <div class="meta">
+        <span class="chip">200 OK / results[]</span>
+        <span class="chip file">internal/httpapi/web/js/app.js</span>
+        <span class="chip">エラー: 4xx/5xx 共通エンベロープ</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 共有契約 -->
+  <div class="contract">
+    <h3>登録と検索をつなぐ「共有契約」</h3>
+    <ul>
+      <li>同一モデル：取込の埋め込み生成も、検索のクエリ埋め込みも <code>gemini_embedding_model</code>（gemini-embedding-2-preview）</li>
+      <li>同一次元：両者とも <code>output_dimensionality = 3072</code></li>
+      <li>同一距離タイプ：VECTOR INDEX も VECTOR_SEARCH も <code>COSINE</code></li>
+      <li>接点テーブル：<code>image_embeddings</code>（image_uri / embedding / content_type / generated_at）</li>
+    </ul>
+    <p style="margin:12px 0 0;color:var(--muted);font-size:13px;">この 4 点が一致しているからこそ、テキストクエリと画像が同じベクトル空間で比較でき、意味的に近い画像が返る。どれか 1 つでもずれると検索結果が壊れるため、スキーマ変更は取込・検索の両 spec の再検証トリガーになる。</p>
+  </div>
+
+</div>
+
+<footer>
+  big-query-image-search ／ specs: gcp-infrastructure → image-ingestion-pipeline → image-search-api
+</footer>
+</body>
+</html>

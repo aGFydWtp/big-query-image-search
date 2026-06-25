@@ -1,0 +1,1912 @@
+{
+  "_meta": {
+    "fetched_at": "2026-06-26T02:37:25",
+    "source": "https://api.artic.edu/api/v1/artworks",
+    "fields": "id,title,artist_display,classification_title",
+    "total_corpus": 380,
+    "fetched": 380,
+    "missing": []
+  },
+  "meta": {
+    "aic-27": {
+      "title": "Remembrance of Italy",
+      "artist_display": "Jean-Baptiste-Camille Corot (French, 1796-1875)\nprinted by Auguste Delâtre (French, 1822-1907)\npublished by Cadart et Chavalier, Editeurs (French, 1801-1900)",
+      "classification_title": "etching"
+    },
+    "aic-873": {
+      "title": "Tobias and the Angel",
+      "artist_display": "Jean Charles Cazin (French, 1841–1901)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-878": {
+      "title": "Wounded Eurydice",
+      "artist_display": "Jean-Baptiste-Camille Corot (French, 1796–1875)",
+      "classification_title": "painting"
+    },
+    "aic-2156": {
+      "title": "Lights of Other Days",
+      "artist_display": "John Frederick Peto (American, 1854–1907)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-3422": {
+      "title": "Two Women Drying Themselves",
+      "artist_display": "Suzanne Valadon\nFrench, 1865-1938",
+      "classification_title": "soft-ground etching"
+    },
+    "aic-3446": {
+      "title": "The Birth of Annette",
+      "artist_display": "Edouard Jean Vuillard\nFrench, 1868-1940",
+      "classification_title": "lithograph"
+    },
+    "aic-3665": {
+      "title": "Maoris and Animals",
+      "artist_display": "Paul Gauguin\nFrench, 1848-1903",
+      "classification_title": "woodcut"
+    },
+    "aic-4643": {
+      "title": "Parrot",
+      "artist_display": "Wilhelm Schimmel\nAmerican, born Germany, 1817–1890\nCumberland County, Pennsylvania",
+      "classification_title": "sculpture"
+    },
+    "aic-4877": {
+      "title": "Country Preacher",
+      "artist_display": "Artist unknown (American, 19th century)",
+      "classification_title": "sculpture"
+    },
+    "aic-4939": {
+      "title": "Heads of Tahitian Women, Frontal and Profile Views",
+      "artist_display": "Paul Gauguin\nFrench, 1848-1903",
+      "classification_title": "charcoal"
+    },
+    "aic-5610": {
+      "title": "'Crazy Quilt' Parlor Throw",
+      "artist_display": "Chicopee Falls, Massachusetts, United States",
+      "classification_title": "textile"
+    },
+    "aic-6171": {
+      "title": "Linger, longer, loo, plate seven from Yvette Guilbert",
+      "artist_display": "Henri de Toulouse-Lautrec (French, 1864-1901)\nprinted by Westminster Press (English, 20th century)\npublished by the Ernest Brown & Phillips (English, 20th century)",
+      "classification_title": "lithograph"
+    },
+    "aic-6174": {
+      "title": "Taking a Bow, plate eight from Yvette Guilbert",
+      "artist_display": "Henri de Toulouse-Lautrec (French, 1864-1901)\nprinted by Westminster Press (English, 20th century)\npublished by the Ernest Brown & Phillips (English, 20th century)",
+      "classification_title": "lithograph"
+    },
+    "aic-6602": {
+      "title": "The Light, from the third album of L'Estampe originale",
+      "artist_display": "Alexandre Lunois (French, 1863-1916)\nprinted by A. Lafontaine & fils (French, 19th century)\npublished by L'Estampe originale (French, 1893-1895)",
+      "classification_title": "lithograph"
+    },
+    "aic-6687": {
+      "title": "Fragment",
+      "artist_display": "France",
+      "classification_title": "textile"
+    },
+    "aic-7157": {
+      "title": "Jockey",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "graphite"
+    },
+    "aic-7601": {
+      "title": "Carnot is Sick!",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "lithograph"
+    },
+    "aic-7690": {
+      "title": "The Englishman at the Moulin Rouge",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "lithograph"
+    },
+    "aic-8325": {
+      "title": "Young Woman Playing a Mandolin, Study for Portrait of Mlle. Fiocre in the Ballet \"La Source\"",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "graphite"
+    },
+    "aic-8636": {
+      "title": "Elsa, called The Viennese",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "lithograph"
+    },
+    "aic-8980": {
+      "title": "Landscape with Two Poplars",
+      "artist_display": "Vasily Kandinsky\nBorn Moscow (formerly Russian Empire, now Russia), 1866; died Neuilly-sur-Seine, France, 1944",
+      "classification_title": "painting"
+    },
+    "aic-8987": {
+      "title": "Painting with Green Center",
+      "artist_display": "Vasily Kandinsky\nBorn Moscow (formerly Russian Empire, now Russia), 1866; died Neuilly-sur-Seine, France, 1944",
+      "classification_title": "painting"
+    },
+    "aic-9021": {
+      "title": "The Bewitched Mill",
+      "artist_display": "Franz Marc\nGerman, 1880–1916",
+      "classification_title": "oil on canvas"
+    },
+    "aic-9148": {
+      "title": "Ballet Dancers",
+      "artist_display": "Henri de Toulouse-Lautrec (French, 1864–1901)",
+      "classification_title": "painting"
+    },
+    "aic-9155": {
+      "title": "Debauchery (second plate)",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "lithograph"
+    },
+    "aic-10344": {
+      "title": "Flock of Sheep at the Edge of a Wood",
+      "artist_display": "Charles Émile Jacque\nFrench, 1813-1894",
+      "classification_title": "etching"
+    },
+    "aic-10495": {
+      "title": "Woman's Changfu (Informal Court Robe)",
+      "artist_display": "Manchu\nChina",
+      "classification_title": "textile"
+    },
+    "aic-11129": {
+      "title": "The Horse Fancier",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "lithograph"
+    },
+    "aic-11136": {
+      "title": "The Photographer Sescau",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "lithograph"
+    },
+    "aic-11723": {
+      "title": "Woman at Her Toilette",
+      "artist_display": "Berthe Morisot (French, 1841–1895)",
+      "classification_title": "painting"
+    },
+    "aic-11732": {
+      "title": "Tour St. Laurent, Rouen",
+      "artist_display": "Donald Shaw MacLaughlan\nAmerican, born Canada, 1876-1938",
+      "classification_title": "etching"
+    },
+    "aic-11774": {
+      "title": "Saint Sulpice, Paris: La Grande Tour",
+      "artist_display": "Donald Shaw MacLaughlan\nAmerican, born Canada, 1876-1938",
+      "classification_title": "etching"
+    },
+    "aic-11789": {
+      "title": "Square from a 'Crazy Quilt'",
+      "artist_display": "United States",
+      "classification_title": "textile"
+    },
+    "aic-11790": {
+      "title": "Square from a 'Crazy Quilt'",
+      "artist_display": "United States",
+      "classification_title": "textile"
+    },
+    "aic-11791": {
+      "title": "Square from a 'Crazy Quilt'",
+      "artist_display": "United States",
+      "classification_title": "textile"
+    },
+    "aic-11934": {
+      "title": "Lynton, England",
+      "artist_display": "Donald Shaw MacLaughlan\nAmerican, born Canada, 1876-1938",
+      "classification_title": "etching"
+    },
+    "aic-12888": {
+      "title": "Portrait of the Artist's Sister",
+      "artist_display": "Georges Lemmen (Belgian, 1865–1916)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-12977": {
+      "title": "Cupid's Hunting Fields",
+      "artist_display": "Sir Edward Burne-Jones\nEnglish, 1833-1898",
+      "classification_title": "gouache"
+    },
+    "aic-13170": {
+      "title": "The Bridge, Santa Marta",
+      "artist_display": "James McNeill Whistler\nAmerican, 1834-1903",
+      "classification_title": "etching"
+    },
+    "aic-13560": {
+      "title": "Mlle Bécat at the Café des Ambassadeurs",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "lithograph"
+    },
+    "aic-13572": {
+      "title": "Three-Quarter Length Portrait of a Woman",
+      "artist_display": "Constantin Guys\nFrench, 1802-1892",
+      "classification_title": "ink or chalk wash"
+    },
+    "aic-13745": {
+      "title": "Himself",
+      "artist_display": "Robert Henri (American, 1865–1929)",
+      "classification_title": "painting"
+    },
+    "aic-13916": {
+      "title": "On the Balcony",
+      "artist_display": "Berthe Morisot\nFrench, 1841-1895",
+      "classification_title": "watercolor"
+    },
+    "aic-14328": {
+      "title": "Portrait of The Hon. Frank Charteris",
+      "artist_display": "Julia Margaret Cameron\nEnglish, 1815–1879",
+      "classification_title": "albumen silver print"
+    },
+    "aic-14475": {
+      "title": "Landscape with a Rainbow",
+      "artist_display": "Charles François Daubigny\nFrench, 1817-1878",
+      "classification_title": "chalk"
+    },
+    "aic-14572": {
+      "title": "The Millinery Shop",
+      "artist_display": "Edgar Degas (French, 1834–1917)",
+      "classification_title": "painting"
+    },
+    "aic-14574": {
+      "title": "Henri Degas and His Niece Lucie Degas (The Artist's Uncle and Cousin)",
+      "artist_display": "Edgar Degas (French, 1834–1917)",
+      "classification_title": "painting"
+    },
+    "aic-14647": {
+      "title": "Young Woman Sewing",
+      "artist_display": "Pierre-Auguste Renoir (French, 1841–1919)",
+      "classification_title": "painting"
+    },
+    "aic-14650": {
+      "title": "Alfred Sisley",
+      "artist_display": "Pierre-Auguste Renoir (French, 1841–1919)",
+      "classification_title": "painting"
+    },
+    "aic-14655": {
+      "title": "Two Sisters (On the Terrace)",
+      "artist_display": "Pierre-Auguste Renoir (French, 1841–1919)",
+      "classification_title": "painting"
+    },
+    "aic-14792": {
+      "title": "Olive Trees, Corfu",
+      "artist_display": "John Singer Sargent\nAmerican, 1856-1925",
+      "classification_title": "watercolor"
+    },
+    "aic-14817": {
+      "title": "Flowers",
+      "artist_display": "Julian Alden Weir\nAmerican, 1852-1919",
+      "classification_title": "watercolor"
+    },
+    "aic-15705": {
+      "title": "Resting",
+      "artist_display": "Antonio Mancini (Italian, 1852–1930)",
+      "classification_title": "painting"
+    },
+    "aic-15728": {
+      "title": "An Artist at His Easel",
+      "artist_display": "John Singer Sargent\nAmerican, 1856-1925",
+      "classification_title": "watercolor"
+    },
+    "aic-15860": {
+      "title": "Seated Breton Woman",
+      "artist_display": "Paul Gauguin\nFrench, 1848-1903",
+      "classification_title": "charcoal"
+    },
+    "aic-16496": {
+      "title": "No te aha oe riri (Why Are You Angry?)",
+      "artist_display": "Paul Gauguin (French, 1848–1903)",
+      "classification_title": "painting"
+    },
+    "aic-16544": {
+      "title": "Charing Cross Bridge, London",
+      "artist_display": "Claude Monet (French, 1840–1926)",
+      "classification_title": "painting"
+    },
+    "aic-16545": {
+      "title": "Brooklyn Bridge",
+      "artist_display": "Henry Ward Ranger\nAmerican, 1858–1916",
+      "classification_title": "painting"
+    },
+    "aic-16549": {
+      "title": "Apples and Grapes",
+      "artist_display": "Claude Monet (French, 1840–1926)",
+      "classification_title": "painting"
+    },
+    "aic-16571": {
+      "title": "Arrival of the Normandy Train, Gare Saint-Lazare",
+      "artist_display": "Claude Monet (French, 1840–1926)",
+      "classification_title": "painting"
+    },
+    "aic-16617": {
+      "title": "Chrysanthemums",
+      "artist_display": "Pierre-Auguste Renoir (French, 1841–1919)",
+      "classification_title": "painting"
+    },
+    "aic-16622": {
+      "title": "Madame Léon Clapisson",
+      "artist_display": "Pierre-Auguste Renoir (French, 1841–1919)",
+      "classification_title": "painting"
+    },
+    "aic-16633": {
+      "title": "The Seine at Port-Marly, Piles of Sand",
+      "artist_display": "Alfred Sisley (British, active in France, 1839–1899)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-16636": {
+      "title": "Hesitation (Madame Monteaux?)",
+      "artist_display": "Alfred Stevens (Belgian, 1823–1906)",
+      "classification_title": "painting"
+    },
+    "aic-16659": {
+      "title": "Old Tower at Avignon",
+      "artist_display": "Samuel Colman (American, 1832–1920)",
+      "classification_title": "painting"
+    },
+    "aic-16758": {
+      "title": "Dancer Stretching at the Bar",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "pastel"
+    },
+    "aic-16772": {
+      "title": "Adirondacks Guide",
+      "artist_display": "Winslow Homer\nAmerican, 1836-1910",
+      "classification_title": "watercolor"
+    },
+    "aic-16776": {
+      "title": "After the Hurricane, Bahamas",
+      "artist_display": "Winslow Homer\nAmerican, 1836-1910",
+      "classification_title": "watercolor"
+    },
+    "aic-16782": {
+      "title": "Campfire, Adirondacks",
+      "artist_display": "Winslow Homer\nAmerican, 1836-1910",
+      "classification_title": "watercolor"
+    },
+    "aic-16831": {
+      "title": "Stowing Sail",
+      "artist_display": "Winslow Homer\nAmerican, 1836-1910",
+      "classification_title": "watercolor"
+    },
+    "aic-17078": {
+      "title": "\"Called to The Rescue (Life Boat Scene)\"",
+      "artist_display": "Woven by Thomas Stevens (English, 1867-88)\nCoventry and London, England",
+      "classification_title": "textile"
+    },
+    "aic-17265": {
+      "title": "Man Bathing",
+      "artist_display": "Edvard Munch\nNorwegian, 1863-1944",
+      "classification_title": "woodcut"
+    },
+    "aic-18161": {
+      "title": "At the Concert",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "zincograph"
+    },
+    "aic-19339": {
+      "title": "Arlésiennes (Mistral)",
+      "artist_display": "Paul Gauguin (French, 1848–1903)",
+      "classification_title": "painting"
+    },
+    "aic-19924": {
+      "title": "The Garden",
+      "artist_display": "James McNeill Whistler\nAmerican, 1834-1903",
+      "classification_title": "etching"
+    },
+    "aic-19926": {
+      "title": "Portrait of Francis Seymour Haden, No. 2 (While Etching)",
+      "artist_display": "Francis Seymour Haden\nEnglish, 1818-1910",
+      "classification_title": "etching"
+    },
+    "aic-20545": {
+      "title": "Rocks at Port-Goulphar, Belle-Île",
+      "artist_display": "Claude Monet (French, 1840–1926)",
+      "classification_title": "painting"
+    },
+    "aic-20701": {
+      "title": "Waterloo Bridge, Sunlight Effect",
+      "artist_display": "Claude Monet (French, 1840–1926)",
+      "classification_title": "painting"
+    },
+    "aic-22089": {
+      "title": "Woman's Sleeve Bands",
+      "artist_display": "Han-Chinese\nChina",
+      "classification_title": "textile"
+    },
+    "aic-22153": {
+      "title": "Water Carriers on the Nile",
+      "artist_display": "John Singer Sargent (American, 1856–1925)",
+      "classification_title": "painting"
+    },
+    "aic-22711": {
+      "title": "The Pastry Shop, plate ten from Landscapes and Interiors",
+      "artist_display": "Edouard Vuillard (French, 1868-1940)\nprinted by Auguste Clot (French, 1858-1936)\npublished by Ambroise Vollard (French, 1867-1939)",
+      "classification_title": "lithograph"
+    },
+    "aic-22722": {
+      "title": "Interior with Pink Wallpaper III, plate seven from Landscapes and Interiors",
+      "artist_display": "Edouard Vuillard (French, 1868-1940)\nprinted by Auguste Clot (French, 1858-1936)\npublished by Ambroise Vollard (French, 1867-1939)",
+      "classification_title": "lithograph"
+    },
+    "aic-22725": {
+      "title": "The Two Sisters-in-Law, plate twelve from Landscapes and Interiors",
+      "artist_display": "Edouard Vuillard (French, 1868-1940)\nprinted by Auguste Clot (French, 1858-1936)\npublished by Ambroise Vollard (French, 1867-1939)",
+      "classification_title": "lithograph"
+    },
+    "aic-22729": {
+      "title": "Interior with Pink Wallpaper II, plate six from Landscapes and Interiors",
+      "artist_display": "Edouard Vuillard (French, 1868-1940)\nprinted by Auguste Clot (French, 1858-1936)\npublished by Ambroise Vollard (French, 1867-1939)",
+      "classification_title": "lithograph"
+    },
+    "aic-22740": {
+      "title": "Interior with Hanging Lamp, plate four from Landscapes and Interiors",
+      "artist_display": "Edouard Vuillard (French, 1868-1940)\nprinted by Auguste Clot (French, 1858-1936)\npublished by Ambroise Vollard (French, 1867-1939)",
+      "classification_title": "lithograph"
+    },
+    "aic-23766": {
+      "title": "Memorial Portrait of the Actor Nakamura Kanjaku II",
+      "artist_display": "Utagawa Kunisada I (Toyokuni III)\nJapanese, 1786-1864",
+      "classification_title": "print"
+    },
+    "aic-24926": {
+      "title": "Self-Portrait",
+      "artist_display": "Edvard Munch\nNorwegian, 1863-1944",
+      "classification_title": "crayon"
+    },
+    "aic-25838": {
+      "title": "Pistachio Tree at Château Noir",
+      "artist_display": "Paul Cézanne\nFrench, 1839-1906",
+      "classification_title": "watercolor"
+    },
+    "aic-25845": {
+      "title": "Woman at Her Toilette",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "pastel"
+    },
+    "aic-25854": {
+      "title": "Fishing Boat",
+      "artist_display": "Johan Barthold Jongkind\nDutch, 1819-1891",
+      "classification_title": "watercolor"
+    },
+    "aic-25872": {
+      "title": "The White Bridge",
+      "artist_display": "John Henry Twachtman (American, 1853–1902)",
+      "classification_title": "painting"
+    },
+    "aic-26678": {
+      "title": "Night Rain at Makura Bridge (Makurabashi yau), from the series \"Eight Views of the Sumida River (Sumidagawa hakkei)\"",
+      "artist_display": "Utagawa Hiroshige II (Shigenobu)\nJapanese, 1826-1869",
+      "classification_title": "woodblock print"
+    },
+    "aic-27696": {
+      "title": "Guillaumin with the Hanged Man",
+      "artist_display": "Paul Cézanne\nFrench, 1839-1906",
+      "classification_title": "etching"
+    },
+    "aic-27764": {
+      "title": "Approaching Storm",
+      "artist_display": "Eugène-Louis Boudin (French, 1824–1898)",
+      "classification_title": "oil on panel"
+    },
+    "aic-27943": {
+      "title": "Mahana no atua (Day of the God)",
+      "artist_display": "Paul Gauguin (French, 1848–1903)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-27949": {
+      "title": "Madame Roulin Rocking the Cradle (La berceuse)",
+      "artist_display": "Vincent van Gogh (Dutch, 1853–1890)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-27952": {
+      "title": "Still Life: Melon, Fish Jar",
+      "artist_display": "Imitator of Vincent van Gogh (Dutch, 1853–1890)",
+      "classification_title": "oil on panel"
+    },
+    "aic-28086": {
+      "title": "James McNeill Whistler",
+      "artist_display": "Walter Greaves (English, 1841–1930)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-28146": {
+      "title": "Alpine Scene",
+      "artist_display": "Gustave Doré (French, 1832–1883)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-28560": {
+      "title": "The Bedroom",
+      "artist_display": "Vincent van Gogh (Dutch, 1853–1890)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-30928": {
+      "title": "The Terrace Bridge, Central Park",
+      "artist_display": "Maurice Prendergast\nAmerican, 1858-1924",
+      "classification_title": "watercolor"
+    },
+    "aic-31813": {
+      "title": "Retiring",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "pastel"
+    },
+    "aic-32192": {
+      "title": "Americans Baking Bread (Amerikajin pan wo yaku zu)",
+      "artist_display": "Utagawa Yoshikazu\nJapanese, active c. 1850-70",
+      "classification_title": "woodblock print"
+    },
+    "aic-32221": {
+      "title": "Americans Drawn from Life (Sho utsushi Amerikajin)",
+      "artist_display": "Utagawa Yoshikazu\nJapanese, active c. 1850–70",
+      "classification_title": "woodblock print"
+    },
+    "aic-32288": {
+      "title": "Chinese Man from Nanking Admiring a Fan (Shincho Nankinjin kansho Koshu ogi no zu), from the series \"Foreigners Drawn from Life (Ikiutsushi ikoku jinbutsu)\"",
+      "artist_display": "Utagawa Sadahide\nJapanese, 1807-1873",
+      "classification_title": "woodblock print"
+    },
+    "aic-32317": {
+      "title": "Dutch Woman Making a Toast to Her Children (Oranda fujin kyosho aijido no zu), from the series \"Foreigners Drawn from Life (Ikiutsushi ikoku jinbutsu)\"",
+      "artist_display": "Utagawa Sadahide\nJapanese, 1807-1873",
+      "classification_title": "woodblock print"
+    },
+    "aic-32382": {
+      "title": "Vehicles on the Streets of Tokyo (Tokyo orai kuruma zukushi)",
+      "artist_display": "Utagawa Yoshitora\nJapanese, active c. 1836-87",
+      "classification_title": "woodblock print"
+    },
+    "aic-32416": {
+      "title": "The Interior of the Gankiro in Yokohama (Yokohama Gankiro mikomi no zu)",
+      "artist_display": "Utagawa Hiroshige II (Shigenobu)\nJapanese, 1826-1869",
+      "classification_title": "woodblock print"
+    },
+    "aic-32432": {
+      "title": "A Picture of Prosperity: America (Amerika shin no zu)",
+      "artist_display": "Utagawa Hiroshige II (Shigenobu)\nJapanese, 1826-1869",
+      "classification_title": "woodblock print"
+    },
+    "aic-36005": {
+      "title": "Woman with a Tray—Breakfast (Madame Baron and Mademoiselle Popo), plate two from Elles",
+      "artist_display": "Henri de Toulouse-Lautrec (French, 1864-1901)\npublished by Gustave Pellet (French, 1859-1919)\nprobably printed by Auguste Clot (French, 1858-1936)",
+      "classification_title": "lithograph"
+    },
+    "aic-38666": {
+      "title": "The Water Fan",
+      "artist_display": "Winslow Homer\nAmerican, 1836-1910",
+      "classification_title": "watercolor"
+    },
+    "aic-39068": {
+      "title": "The Milliner",
+      "artist_display": "Eva Gonzalès\nFrench, 1849-1883",
+      "classification_title": "oil pastel"
+    },
+    "aic-39954": {
+      "title": "Seventeenth-Century Interior",
+      "artist_display": "Charles Gifford Dyer (American, 1846–1912)",
+      "classification_title": "painting"
+    },
+    "aic-40549": {
+      "title": "The Valley of Arconville",
+      "artist_display": "Theodore Robinson (American, 1852–1896)",
+      "classification_title": "painting"
+    },
+    "aic-41315": {
+      "title": "At the Circus: Work in the Ring",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "pastel"
+    },
+    "aic-43683": {
+      "title": "E-1: English Great Room of the Late Tudor Period, 1550-1603",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43686": {
+      "title": "E-2: English Bedchamber of the Jacobean or Stuart Period, 1603-88",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43690": {
+      "title": "E-3: English Reception Room of the Jacobean Period, 1625-55",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43693": {
+      "title": "E-4: English Drawing Room of the Late Jacobean Period, 1680-1702",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43697": {
+      "title": "E-5: English Cottage Kitchen of the Queen Anne Period, 1702-14",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43711": {
+      "title": "E-9: English Drawing Room of the Georgian period, 1770-1800",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43714": {
+      "title": "E-10: English Dining Room of the Georgian Period, 1770-90",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43739": {
+      "title": "E-17: French Bedroom, Late 16th Century",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43743": {
+      "title": "E-18: French Salon of the Louis XIV Period, 1660-1700",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43751": {
+      "title": "E-21: French Boudoir of the Louis XV Period, 1740-60",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43757": {
+      "title": "E-22: French Provincial Bedroom of the Louis XV Period, 18th Century",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43761": {
+      "title": "E-23: French Dining Room of the Periods of Louis XV and Louis XIV",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43764": {
+      "title": "E-24: French Salon of the Louis XVI Period, c. 1780",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43771": {
+      "title": "E-26: French Anteroom of the Empire Period, c. 1810",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-43784": {
+      "title": "E-29: English Roman Catholic Church in the Gothic Style, 1275-1300",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-44018": {
+      "title": "Croquet Scene",
+      "artist_display": "Winslow Homer (American, 1836–1910)",
+      "classification_title": "painting"
+    },
+    "aic-44892": {
+      "title": "Fish (Still Life)",
+      "artist_display": "Édouard Manet (French, 1832–1883)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-45243": {
+      "title": "Two Dancers",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "pastel"
+    },
+    "aic-45317": {
+      "title": "A2: New Hampshire Parlor, c. 1710",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "thorne rooms"
+    },
+    "aic-45320": {
+      "title": "A3: Massachusetts Dining Room, 1720",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45323": {
+      "title": "A4: Connecticut Valley Tavern Parlor, c. 1750",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45327": {
+      "title": "A5: Massachusetts Drawing Room, 1768",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "thorne rooms"
+    },
+    "aic-45336": {
+      "title": "A8: Massachusetts Bedroom, c. 1801",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45339": {
+      "title": "A9: Massachusetts Parlor, 1818",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45345": {
+      "title": "A11: Rhode Island Parlor, c. 1820",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45348": {
+      "title": "A12: Cape Cod Living Room, 1750-1850",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45352": {
+      "title": "A14: Pennsylvania Drawing Room, 1834-36",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45356": {
+      "title": "A15: New York Parlor, 1850-70",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45358": {
+      "title": "A16: Pennsylvania Drawing Room, 1761",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45360": {
+      "title": "A17: Pennsylvania Kitchen, 1752",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45366": {
+      "title": "A19: Maryland Dining Room, 1770-74",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45369": {
+      "title": "A20: Virginia Dining Room, 1758",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45372": {
+      "title": "A21: Virginia Parlor, 1758-87",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45374": {
+      "title": "A22: Virginia Dining Room, c. 1752",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45379": {
+      "title": "A24: Virginia Entrance Hall, 1751-55",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45382": {
+      "title": "A25: Virginia Drawing Room, 1755",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45388": {
+      "title": "A27: Virginia Kitchen, 18th Century",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45392": {
+      "title": "A28: South Carolina Drawing Room, 1775-1800",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45395": {
+      "title": "A29: South Carolina Ballroom, 1775-1835",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45398": {
+      "title": "A30: Georgia Double Parlor, c. 1850",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45401": {
+      "title": "A31: Tennessee Entrance Hall, 1835",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45404": {
+      "title": "A32: Louisiana Bedroom, 1800-50",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-45407": {
+      "title": "A33: \"Middletown\" Parlor, 1875-90",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-46785": {
+      "title": "Exotic Flower (Woman in a Mantilla)",
+      "artist_display": "Édouard Manet (French, 1832-1883)\npublished by Philippe Burty (French, 1830-1890)\nwritten by Armand Renaud (French, 1836-1895)",
+      "classification_title": "etching"
+    },
+    "aic-48766": {
+      "title": "Les drames de la mer (Dramas of the Sea), from the Volpini Suite",
+      "artist_display": "Paul Gauguin\nFrench, 1848-1903",
+      "classification_title": "zincograph"
+    },
+    "aic-49701": {
+      "title": "Reclining Woman",
+      "artist_display": "Théophile-Alexandre Steinlen\nFrench, born Switzerland, 1859-1923",
+      "classification_title": "etching"
+    },
+    "aic-49891": {
+      "title": "Woman Fixing Her Nails",
+      "artist_display": "Théophile-Alexandre Steinlen\nFrench, born Switzerland, 1859-1923",
+      "classification_title": "aquatint"
+    },
+    "aic-49894": {
+      "title": "Seated Woman Drying Her Feet",
+      "artist_display": "Théophile-Alexandre Steinlen\nFrench, born Switzerland, 1859-1923",
+      "classification_title": "etching"
+    },
+    "aic-50062": {
+      "title": "Wolf - Apsaroke",
+      "artist_display": "Edward S. Curtis\nAmerican, 1868–1952",
+      "classification_title": "photogravure"
+    },
+    "aic-51534": {
+      "title": "Seated Woman Wiping Her Feet",
+      "artist_display": "Théophile-Alexandre Steinlen\nFrench, born Switzerland, 1859-1923",
+      "classification_title": "aquatint"
+    },
+    "aic-54166": {
+      "title": "Portrait of a Young Girl",
+      "artist_display": "Artist unknown (French (?), active 19th century)",
+      "classification_title": "miniature painting"
+    },
+    "aic-54173": {
+      "title": "Portrait of a Young Woman",
+      "artist_display": "Artist unknown (French (?), active 19th century)",
+      "classification_title": "miniature painting"
+    },
+    "aic-54719": {
+      "title": "Cathedral Bridge, Buttermilk Falls, Watkins Glen, N.Y., No. 10 from the series \"On the Line of the ERIE, Railway\"",
+      "artist_display": "Charles Bierstadt\nAmerican, born Germany, 1819–1903",
+      "classification_title": "stereograph (albumen)"
+    },
+    "aic-54747": {
+      "title": "Skylight Cave in the Navy Yard, No. 255 from the series \"In and About the Dells of the Wisconsin River\"",
+      "artist_display": "Henry Hamilton Bennett\nAmerican, born Canada, 1843–1908",
+      "classification_title": "stereograph (albumen)"
+    },
+    "aic-55341": {
+      "title": "Breton Bather",
+      "artist_display": "Paul Gauguin\nFrench, 1848-1903",
+      "classification_title": "pastel"
+    },
+    "aic-55380": {
+      "title": "Old Virginia Home",
+      "artist_display": "David Gilmour Blythe\nAmerican, 1815–1865",
+      "classification_title": "painting"
+    },
+    "aic-56940": {
+      "title": "A Children's Garden Party",
+      "artist_display": "James Tissot\nFrench, 1836-1902",
+      "classification_title": "drypoint"
+    },
+    "aic-58925": {
+      "title": "Paperweight",
+      "artist_display": "New England Glass Company\nCambridge, Massachusetts, 1818-1888",
+      "classification_title": "paperweight"
+    },
+    "aic-58984": {
+      "title": "Landscape along the Seine with the Institut de France and the Pont des Arts",
+      "artist_display": "Alfred Sisley (British, active in France, 1839–1899)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-59772": {
+      "title": "Boys Bathing",
+      "artist_display": "Edvard Munch (Norwegian, 1863-1944)\nprobably printed by Porcaboeuf",
+      "classification_title": "aquatint"
+    },
+    "aic-59779": {
+      "title": "Portrait of a Lady",
+      "artist_display": "Attributed to Adolphe Monticelli (French, 1824-1886)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-59823": {
+      "title": "La Touques near Deauville",
+      "artist_display": "Eugène-Louis Boudin (French, 1824–1898)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-59944": {
+      "title": "The Laundress",
+      "artist_display": "Pierre-Auguste Renoir (French, 1841–1919)",
+      "classification_title": "painting"
+    },
+    "aic-60239": {
+      "title": "The Essex Canal",
+      "artist_display": "Albert Pinkham Ryder\nAmerican, 1847–1917",
+      "classification_title": "painting"
+    },
+    "aic-60294": {
+      "title": "New York Street",
+      "artist_display": "Childe Hassam (American, 1859–1935)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-60812": {
+      "title": "Merahi metua no Tehamana (Tehamana Has Many Parents or The Ancestors of Tehamana)",
+      "artist_display": "Paul Gauguin (French, 1848–1903)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-61128": {
+      "title": "At the Moulin Rouge",
+      "artist_display": "Henri de Toulouse-Lautrec (French, 1864–1901)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-63318": {
+      "title": "The Café of the New Athens",
+      "artist_display": "Jean Louis Forain\nFrench, 1852-1931",
+      "classification_title": "etching"
+    },
+    "aic-63430": {
+      "title": "Seated Woman, Head in Right Hand",
+      "artist_display": "Jean Louis Forain\nFrench, 1852-1931",
+      "classification_title": "lithograph"
+    },
+    "aic-63576": {
+      "title": "Poor Street-Walker!",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "lithograph"
+    },
+    "aic-64001": {
+      "title": "Apples",
+      "artist_display": "Henri Matisse\nFrench, 1869–1954",
+      "classification_title": "oil on canvas"
+    },
+    "aic-64715": {
+      "title": "After a Summer Shower",
+      "artist_display": "George Inness (American, 1825–1894)",
+      "classification_title": "painting"
+    },
+    "aic-64724": {
+      "title": "The Home of the Heron",
+      "artist_display": "George Inness (American, 1825–1894)",
+      "classification_title": "painting"
+    },
+    "aic-64740": {
+      "title": "Landscape, Sunset",
+      "artist_display": "George Inness (American, 1825–1894)",
+      "classification_title": "painting"
+    },
+    "aic-64754": {
+      "title": "Moonrise",
+      "artist_display": "George Inness (American, 1825–1894)",
+      "classification_title": "painting"
+    },
+    "aic-64884": {
+      "title": "Mohnköpfe (Poppyheads) (Dress or Furnishing Fabric)",
+      "artist_display": "Designed by Koloman Moser (Austrian, 1868–1918)\nProduced by Johan Backhausen und Söhne (Austrian, founded 1849)\nAustria, Vienna",
+      "classification_title": "textile"
+    },
+    "aic-64957": {
+      "title": "Grapes, Lemons, Pears, and Apples",
+      "artist_display": "Vincent van Gogh (Dutch, 1853–1890)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-65089": {
+      "title": "May Milton",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "pastel"
+    },
+    "aic-65170": {
+      "title": "Afterglow",
+      "artist_display": "George Inness (American, 1825–1894)",
+      "classification_title": "painting"
+    },
+    "aic-65821": {
+      "title": "Composition (No. 1) Gray-Red",
+      "artist_display": "Piet Mondrian\nDutch, 1872–1944",
+      "classification_title": "painting"
+    },
+    "aic-65845": {
+      "title": "Autumn River Scene, The Brook",
+      "artist_display": "David Bates (English, 1840-1921)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-65912": {
+      "title": "Landscape no. 26",
+      "artist_display": "Marsden Hartley (American, 1877–1943)",
+      "classification_title": "painting"
+    },
+    "aic-65937": {
+      "title": "Landscape No. 3, Cash Entry Mines, New Mexico",
+      "artist_display": "Marsden Hartley (American, 1877–1943)",
+      "classification_title": "painting"
+    },
+    "aic-66144": {
+      "title": "Rocks at the Lighthouse, Biarritz",
+      "artist_display": "Joaquín Sorolla y Bastida (Spanish, 1863-1923)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-66261": {
+      "title": "The Net Mender",
+      "artist_display": "Alfred Stieglitz\nAmerican, 1864–1946",
+      "classification_title": "carbon print"
+    },
+    "aic-66537": {
+      "title": "Study for From Wonder World, from Marigold Garden",
+      "artist_display": "Kate Greenaway\nEnglish, 1846-1901",
+      "classification_title": "watercolor"
+    },
+    "aic-66572": {
+      "title": "Decorative Illustration, from The Illuminated Language of Flowers",
+      "artist_display": "probably Edmund Evans (English, 1826-1905)\nafter Kate Greenaway (English, 1846-1901)\nprinted by Edmund Evans",
+      "classification_title": "reproduction"
+    },
+    "aic-66958": {
+      "title": "Sunset",
+      "artist_display": "Auguste Rodin\nFrench, 1840-1917",
+      "classification_title": "watercolor"
+    },
+    "aic-67170": {
+      "title": "Jane Avril",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "lithograph"
+    },
+    "aic-68388": {
+      "title": "Catskill Mountains",
+      "artist_display": "George Inness (American, 1825–1894)",
+      "classification_title": "painting"
+    },
+    "aic-68433": {
+      "title": "Sawmill, Outskirts of Paris",
+      "artist_display": "Henri Rousseau\nFrench, 1844-1910",
+      "classification_title": "oil on canvas"
+    },
+    "aic-68784": {
+      "title": "Summer in the Catskills",
+      "artist_display": "George Inness (American, 1825–1894)",
+      "classification_title": "painting"
+    },
+    "aic-69137": {
+      "title": "Persons in Louis XV Costumes",
+      "artist_display": "Adolphe Monticelli (French, 1824–1886)",
+      "classification_title": "oil on panel"
+    },
+    "aic-69138": {
+      "title": "Fête d'Après-Midi",
+      "artist_display": "Adolphe Monticelli (French, 1824–1886)",
+      "classification_title": "oil on panel"
+    },
+    "aic-69533": {
+      "title": "Bird's Nest and Ferns",
+      "artist_display": "Fidelia Bridges\nAmerican, 1834–1923",
+      "classification_title": "painting"
+    },
+    "aic-69816": {
+      "title": "Margaret Frances Langton Clarke",
+      "artist_display": "Lewis Carroll (Reverend Charles Lutwidge Dodgson)\nEnglish, 1832–1898",
+      "classification_title": "albumen silver print"
+    },
+    "aic-71191": {
+      "title": "The Fisherman's Family",
+      "artist_display": "Pierre Puvis de Chavannes (French, 1824–1898)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-71294": {
+      "title": "Border for a Table Cover or Valance",
+      "artist_display": "Design attributed to May Morris (English, 1862–1938)\nProduced by Morris & Co., London (English, 1875–1940)",
+      "classification_title": "textile"
+    },
+    "aic-71573": {
+      "title": "A Holiday",
+      "artist_display": "Edward Henry Potthast (American, 1857–1927)",
+      "classification_title": "painting"
+    },
+    "aic-72180": {
+      "title": "Still Life with Flowers",
+      "artist_display": "Henri Fantin-Latour (French, 1836–1904)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-72183": {
+      "title": "Still Life with Fruit and Wine Jug",
+      "artist_display": "Adolphe Monticelli (French, 1824–1886)",
+      "classification_title": "oil on panel"
+    },
+    "aic-72342": {
+      "title": "Garden View",
+      "artist_display": "Henri Stanislas Rouart\nFrench, 1833-1912",
+      "classification_title": "watercolor"
+    },
+    "aic-72801": {
+      "title": "Icebound",
+      "artist_display": "John Henry Twachtman (American, 1853–1902)",
+      "classification_title": "painting"
+    },
+    "aic-72896": {
+      "title": "Head of a Woman and Head of a Bearded Man",
+      "artist_display": "Édouard Manet\nFrench, 1832-1883",
+      "classification_title": "ink or chalk wash"
+    },
+    "aic-72905": {
+      "title": "Panel",
+      "artist_display": "Designed by Arthur Silver (English, 1853–1896)\nFrance, Mulhouse",
+      "classification_title": "textile"
+    },
+    "aic-73182": {
+      "title": "Panel",
+      "artist_display": "Produced by Mathevon et Bouvard, 1810–1895\nFrance, Lyon",
+      "classification_title": "textile"
+    },
+    "aic-74698": {
+      "title": "Panel (Dress Fabric)",
+      "artist_display": "France, Lyons",
+      "classification_title": "textile"
+    },
+    "aic-74947": {
+      "title": "Woman with Grapevine, 4th variant",
+      "artist_display": "Pierre Auguste Renoir (French, 1841-1919)\nprinted by Auguste Clot (French, 1858-1936)\npublished by Ambroise Vollard (French, 1835-1939)",
+      "classification_title": "lithograph"
+    },
+    "aic-77581": {
+      "title": "Mother and Child",
+      "artist_display": "Helen Hyde\nAmerican, 1868-1919",
+      "classification_title": "woodcut"
+    },
+    "aic-80336": {
+      "title": "The Three Skulls",
+      "artist_display": "Paul Cézanne\nFrench, 1839-1906",
+      "classification_title": "watercolor"
+    },
+    "aic-80450": {
+      "title": "Portrait of a Woman",
+      "artist_display": "Charles Cottet (French, 1863-1925)",
+      "classification_title": "painting"
+    },
+    "aic-80567": {
+      "title": "Landscape",
+      "artist_display": "Marcel Ordinaire (French, 1848–1896)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-80587": {
+      "title": "Meditation (Seated Woman)",
+      "artist_display": "Adolphe Monticelli (French, 1824–1886)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-80594": {
+      "title": "Sita",
+      "artist_display": "Odilon Redon\nFrench, 1840-1916",
+      "classification_title": "pastel"
+    },
+    "aic-80611": {
+      "title": "Dancer Kneeling, Seen from the Back",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "charcoal"
+    },
+    "aic-81479": {
+      "title": "Sunset on the Thames",
+      "artist_display": "Francis Seymour Haden\nEnglish, 1818-1910",
+      "classification_title": "etching"
+    },
+    "aic-81533": {
+      "title": "The Races at Longchamp",
+      "artist_display": "Édouard Manet (French, 1832–1883)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-81537": {
+      "title": "Bordighera",
+      "artist_display": "Claude Monet (French, 1840–1926)",
+      "classification_title": "painting"
+    },
+    "aic-81551": {
+      "title": "The Place du Havre, Paris",
+      "artist_display": "Camille Pissarro (French, 1830–1903)",
+      "classification_title": "painting"
+    },
+    "aic-81558": {
+      "title": "Acrobats at the Cirque Fernando (Francisca and Angelina Wartenberg)",
+      "artist_display": "Pierre-Auguste Renoir (French, 1841–1919)",
+      "classification_title": "painting"
+    },
+    "aic-81576": {
+      "title": "Mrs. Potter Palmer",
+      "artist_display": "Anders Leonard Zorn (Swedish, 1860–1920)",
+      "classification_title": "painting"
+    },
+    "aic-82092": {
+      "title": "Woman Reclining, to the Left",
+      "artist_display": "Pierre Auguste Renoir\nFrench, 1841-1919",
+      "classification_title": "etching"
+    },
+    "aic-83149": {
+      "title": "A Man and a Woman in a Park",
+      "artist_display": "Ludek Marold\nCzech, 1865-1898",
+      "classification_title": "drawings (visual works)"
+    },
+    "aic-87088": {
+      "title": "Water Lily Pond",
+      "artist_display": "Claude Monet (French, 1840–1926)",
+      "classification_title": "painting"
+    },
+    "aic-87643": {
+      "title": "The Two Disciples at the Tomb",
+      "artist_display": "Henry Ossawa Tanner (American, 1859–1937)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-88393": {
+      "title": "Portrait of Dr. Gachet",
+      "artist_display": "Vincent van Gogh\nDutch, 1853-1890",
+      "classification_title": "etching"
+    },
+    "aic-88398": {
+      "title": "The Girls on the Bridge",
+      "artist_display": "Edvard Munch\nNorwegian, 1863-1944",
+      "classification_title": "woodcut"
+    },
+    "aic-89157": {
+      "title": "La Peri (Mythological Subject)",
+      "artist_display": "Gustave Moreau\nFrench, 1826-1898",
+      "classification_title": "graphite"
+    },
+    "aic-93433": {
+      "title": "For to Be a Farmer's Boy",
+      "artist_display": "Winslow Homer\nAmerican, 1836-1910",
+      "classification_title": "watercolor"
+    },
+    "aic-94240": {
+      "title": "Flowers: Poppies and Daisies",
+      "artist_display": "Odilon Redon (French, 1840–1916)",
+      "classification_title": "oil on cardboard"
+    },
+    "aic-94241": {
+      "title": "The Red Room, Etretat",
+      "artist_display": "Félix Edouard Vallotton (Swiss, 1865–1925)",
+      "classification_title": "painting"
+    },
+    "aic-94399": {
+      "title": "A Corner of Moret-sur-Loing",
+      "artist_display": "Alfred Sisley\nFrench, 1839-1899",
+      "classification_title": "pastel"
+    },
+    "aic-94841": {
+      "title": "The Song of the Lark",
+      "artist_display": "Jules Breton (French, 1827–1906)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-95993": {
+      "title": "Pond in the Woods",
+      "artist_display": "Narcisse Virgile Diaz de la Peña (French, 1807–1876)",
+      "classification_title": "painting"
+    },
+    "aic-96690": {
+      "title": "Woman with Grapevine, 3rd variant",
+      "artist_display": "Pierre Auguste Renoir (French, 1841-1919)\nprinted by Auguste Clot (French, 1858-1936)\npublished by Ambroise Vollard (French, 1835-1939)",
+      "classification_title": "lithograph"
+    },
+    "aic-96841": {
+      "title": "Melancholy",
+      "artist_display": "Odilon Redon\nFrench, 1840-1916",
+      "classification_title": "pastel"
+    },
+    "aic-97292": {
+      "title": "Spring in France",
+      "artist_display": "Robert William Vonnoh\nAmerican, 1858–1933",
+      "classification_title": "painting"
+    },
+    "aic-97884": {
+      "title": "A Glimpse into Hell, or Fear",
+      "artist_display": "Elihu Vedder (American, 1836–1923)",
+      "classification_title": "painting"
+    },
+    "aic-97912": {
+      "title": "The Mexican Major",
+      "artist_display": "Frederic Remington (American, 1861–1909)",
+      "classification_title": "painting"
+    },
+    "aic-99749": {
+      "title": "Grove of Trees",
+      "artist_display": "Pierre Auguste Renoir\nFrench, 1841-1919",
+      "classification_title": "watercolor"
+    },
+    "aic-100026": {
+      "title": "Studies of Pierre Renoir; His Mother, Aline Charigot; Nudes; and Landscape",
+      "artist_display": "Pierre-Auguste Renoir (French, 1841–1919)",
+      "classification_title": "painting"
+    },
+    "aic-100489": {
+      "title": "The Coast of Labrador",
+      "artist_display": "William Bradford (American, 1823–1892)",
+      "classification_title": "painting"
+    },
+    "aic-100829": {
+      "title": "Magnolias on Light Blue Velvet Cloth",
+      "artist_display": "Martin Johnson Heade (American, 1819–1904)",
+      "classification_title": "painting"
+    },
+    "aic-103166": {
+      "title": "Am. River and Canon from Cape Horn, River below Railroad 1,400 feet. 57 miles from Sacramento, No. 44 from the series \"Watkins' Pacific Railroad\"",
+      "artist_display": "Alfred A. Hart\nAmerican, 1816–1908",
+      "classification_title": "stereograph (albumen)"
+    },
+    "aic-103391": {
+      "title": "Mephisto from the Opera Faust",
+      "artist_display": "Adolphe Monticelli (French, 1824–1886)",
+      "classification_title": "oil on panel"
+    },
+    "aic-103943": {
+      "title": "Manxman Piano",
+      "artist_display": "Designed by Mackay Hugh Baillie Scott\nEnglish, 1865-1945\nMade by John Broadwood and Sons\nEngland, founded 1728\nLondon, England",
+      "classification_title": "musical instrument"
+    },
+    "aic-104106": {
+      "title": "Two Washerwomen Crossing a Small Park in Paris",
+      "artist_display": "Jean François Raffaëlli (French, 1850–1924)",
+      "classification_title": "oil on panel"
+    },
+    "aic-104463": {
+      "title": "Inspiration",
+      "artist_display": "Gustave Moreau\nFrench, 1826-1898",
+      "classification_title": "watercolor"
+    },
+    "aic-105278": {
+      "title": "Ravinia Park Casino Building: Window",
+      "artist_display": "Peter Joseph Weber\nAmerican, born Germany, 1864-1923",
+      "classification_title": "stained glass/leaded glass"
+    },
+    "aic-105331": {
+      "title": "A Talk with the Keeper",
+      "artist_display": "Henry Peach Robinson\nEnglish, 1830–1901",
+      "classification_title": "albumen silver print"
+    },
+    "aic-107312": {
+      "title": "Christ",
+      "artist_display": "José Benito Ortega\nAmerican, 1858–1941\nNew Mexico",
+      "classification_title": "sculpture"
+    },
+    "aic-109314": {
+      "title": "Fishing in Spring, the Pont de Clichy (Asnières)",
+      "artist_display": "Vincent van Gogh (Dutch, 1853–1890)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-109780": {
+      "title": "Love of Winter",
+      "artist_display": "George Wesley Bellows (American, 1882–1925)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-109819": {
+      "title": "Lozenge Composition with Yellow, Black, Blue, Red, and Gray",
+      "artist_display": "Piet Mondrian\nDutch, 1872–1944",
+      "classification_title": "oil on canvas"
+    },
+    "aic-109926": {
+      "title": "Landscape: Window Overlooking the Woods",
+      "artist_display": "Édouard Vuillard (French, 1868-1940)",
+      "classification_title": "painting"
+    },
+    "aic-109985": {
+      "title": "Auti te pape (Women at the River), from the Noa Noa Suite",
+      "artist_display": "Paul Gauguin\nFrench, 1848-1903",
+      "classification_title": "woodcut"
+    },
+    "aic-110268": {
+      "title": "Portrait Bust of General George Duplessis",
+      "artist_display": "Louis Oscar Roty (French, 1846–1911)",
+      "classification_title": "medal"
+    },
+    "aic-110560": {
+      "title": "Basket",
+      "artist_display": "Pomo\nCalifornia, United States",
+      "classification_title": "basketry"
+    },
+    "aic-110867": {
+      "title": "Tight-Rope Walker",
+      "artist_display": "Jean Louis Forain (French, 1852–1931)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-110982": {
+      "title": "Still Life with Flowers",
+      "artist_display": "Odilon Redon (French, 1840–1916)",
+      "classification_title": "painting"
+    },
+    "aic-111062": {
+      "title": "Te raau rahi (The Big Tree)",
+      "artist_display": "Paul Gauguin (French, 1848–1903)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-111377": {
+      "title": "For Sunday's Dinner",
+      "artist_display": "William Michael Harnett (American, born Ireland, 1848–1892)",
+      "classification_title": "painting"
+    },
+    "aic-111625": {
+      "title": "Cavalier",
+      "artist_display": "Mariano Fortuny y Marsal (Spanish, 1838–1874)",
+      "classification_title": "painting"
+    },
+    "aic-111651": {
+      "title": "Women of the Ouled Nayls",
+      "artist_display": "Eugène Fromentin (French, 1820–1876)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-111656": {
+      "title": "Pardon in Brittany",
+      "artist_display": "Gaston La Touche (French, 1854–1913)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-111736": {
+      "title": "Circassian Cavalry Awaiting their Commanding Officer at the Door of a Byzantine Monument; Memory of the Orient",
+      "artist_display": "Alberto Pasini (Italian, 1826-1899)",
+      "classification_title": "painting"
+    },
+    "aic-111902": {
+      "title": "Mary Cassatt at the Louvre: The Paintings Gallery",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "etching"
+    },
+    "aic-111986": {
+      "title": "Zodiaque (\"La Plume\")",
+      "artist_display": "Alphonse Marie Mucha\nCzech, 1860-1939",
+      "classification_title": "poster"
+    },
+    "aic-113041": {
+      "title": "Man Fishing on Bank of River",
+      "artist_display": "Anders Zorn\nSwedish, 1860-1920",
+      "classification_title": "pen and ink drawings"
+    },
+    "aic-113064": {
+      "title": "The Return, Tynemouth (recto) Study (verso)",
+      "artist_display": "Winslow Homer\nAmerican, 1836-1910",
+      "classification_title": "watercolor"
+    },
+    "aic-113436": {
+      "title": "Horseman (recto); Horse and Rider (verso)",
+      "artist_display": "Auguste Rodin\nFrench, 1840-1917",
+      "classification_title": "gouache"
+    },
+    "aic-115638": {
+      "title": "Landscape with Gate at Sunset",
+      "artist_display": "Hugh Huntington Howard\nAmerican, 1860-1927",
+      "classification_title": "watercolor"
+    },
+    "aic-117618": {
+      "title": "E-20: French Library of the Louis XV Period, c. 1720",
+      "artist_display": "Designed by Narcissa Niblack Thorne\nAmerican, 1882-1966",
+      "classification_title": "miniature"
+    },
+    "aic-117700": {
+      "title": "On the Bank",
+      "artist_display": "Frederick Carl Frieseke (American, 1874–1939)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-119383": {
+      "title": "Bismarck, from Les Génies de la Mort",
+      "artist_display": "Edmond Guilliaume\nFrench, active 1870s",
+      "classification_title": "lithograph"
+    },
+    "aic-119424": {
+      "title": "Abandoned, plate five from A Life",
+      "artist_display": "Max Klinger\nGerman, 1857-1920",
+      "classification_title": "etching"
+    },
+    "aic-121377": {
+      "title": "Boats at Rest",
+      "artist_display": "Arthur Wesley Dow (American, 1857–1922)",
+      "classification_title": "painting"
+    },
+    "aic-122130": {
+      "title": "Les Andelys, Côte d'Aval",
+      "artist_display": "Paul Signac (French, 1863-1935)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-124311": {
+      "title": "Versailles, Trianon, (Coin de Parc)",
+      "artist_display": "Jean-Eugène-Auguste Atget\nFrench, 1857–1927",
+      "classification_title": "albumen silver print"
+    },
+    "aic-125967": {
+      "title": "Dancers at the Bar",
+      "artist_display": "Georges-William Thornley (French, 1857-1935)\nafter Edgar Degas (French, 1834-1917)\nprinted by Atelier Becquet (French, 19th century)\npublished by Boussod, Valadon, & Company (French, 18th-19th century)",
+      "classification_title": "lithograph"
+    },
+    "aic-127727": {
+      "title": "Flower Basket, from the series \"Worlds of Things (Momoyogusa)\"",
+      "artist_display": "Kamisaka Sekka\nJapanese, 1866-1942\nUsudo\nJapanese, unknown",
+      "classification_title": "woodblock print"
+    },
+    "aic-128256": {
+      "title": "Sunset on the Thames",
+      "artist_display": "Francis Seymour Haden\nEnglish, 1818-1910",
+      "classification_title": "etching"
+    },
+    "aic-129849": {
+      "title": "Houses at Murnau",
+      "artist_display": "Vasily Kandinsky\nBorn Moscow (formerly Russian Empire, now Russia), 1866; died Neuilly-sur-Seine, France, 1944",
+      "classification_title": "painting"
+    },
+    "aic-133635": {
+      "title": "Portière",
+      "artist_display": "Designed by Anna G. Lyman (American, active 1880/1900)\nExecuted by Associated Artists, 1833–1907\nUnited States, Illinois, Chicago",
+      "classification_title": "textile"
+    },
+    "aic-133724": {
+      "title": "Jeanne d'Arc",
+      "artist_display": "Antonin Mercié (French, 1845–1916)\nCast by F. Barbedienne, Paris (French, 1838–1955)",
+      "classification_title": "bust/head"
+    },
+    "aic-133864": {
+      "title": "The Defense of Paris",
+      "artist_display": "Jean Louis Ernest Meissonier (French, 1815–1891)",
+      "classification_title": "oil on panel"
+    },
+    "aic-138009": {
+      "title": "Chelsea Bridge and Church",
+      "artist_display": "James McNeill Whistler\nAmerican, 1834-1903",
+      "classification_title": "etching"
+    },
+    "aic-139426": {
+      "title": "The Garden",
+      "artist_display": "James McNeill Whistler\nAmerican, 1834-1903",
+      "classification_title": "transfer lithograph"
+    },
+    "aic-143697": {
+      "title": "Portrait Bust of Jules Lefebvre",
+      "artist_display": "Louis Oscar Roty (French, 1846–1911)",
+      "classification_title": "medal"
+    },
+    "aic-143713": {
+      "title": "Wall Street Ferry, New York, No. 4579 from the series \"Anthony's Stereoscopic Views\"",
+      "artist_display": "Anthony & Company\nAmerican, active 1848–1901",
+      "classification_title": "stereograph (albumen)"
+    },
+    "aic-143882": {
+      "title": "Michel Eugene Chevreul",
+      "artist_display": "Louis Oscar Roty (French, 1846–1911)",
+      "classification_title": "medal"
+    },
+    "aic-144675": {
+      "title": "Armchair",
+      "artist_display": "Luigi Frullini\nItalian, 1839–1897\nFlorence, Italy",
+      "classification_title": "seating"
+    },
+    "aic-145457": {
+      "title": "Panel",
+      "artist_display": "Designed by René Beauclair (French, active c. 1910)\nFrance",
+      "classification_title": "textile"
+    },
+    "aic-145808": {
+      "title": "Study of Two Bedouins",
+      "artist_display": "John Singer Sargent (American, 1856–1925)",
+      "classification_title": "painting"
+    },
+    "aic-146061": {
+      "title": "Panel",
+      "artist_display": "Possibly designed by Owen Jones (English, 1809–1874)\nMade by Warner, Sillet, and Ramm, 1870–1874\nEngland, Spitalfields or Bethnal Green, Hollybush Gardens",
+      "classification_title": "textile"
+    },
+    "aic-146359": {
+      "title": "Apache Agua Caliente Arizona",
+      "artist_display": "Edward Warren Sawyer (American, 1876–1932)",
+      "classification_title": "medal"
+    },
+    "aic-148789": {
+      "title": "Landscape with Mill and a Wooden Bridge",
+      "artist_display": "Mary Nimmo Moran\nAmerican, 1842-1929",
+      "classification_title": "etching"
+    },
+    "aic-149052": {
+      "title": "Strawberry Thief",
+      "artist_display": "Designed by William Morris (English, 1834–1896) \nProduced by Morris & Co., London (English, 1875–1940)\nMerton Abbey, London (English, 1881–1940)",
+      "classification_title": "printed textile"
+    },
+    "aic-149571": {
+      "title": "Green River, Wyoming Territory",
+      "artist_display": "Thomas Moran\nAmerican, born England, 1837-1926",
+      "classification_title": "etching"
+    },
+    "aic-150109": {
+      "title": "Have we not Heard the Bridegroom is so Sweet",
+      "artist_display": "Julia Margaret Cameron\nEnglish, 1815–1879",
+      "classification_title": "albumen silver print"
+    },
+    "aic-150140": {
+      "title": "Julia Jackson",
+      "artist_display": "Julia Margaret Cameron\nEnglish, 1815–1879",
+      "classification_title": "albumen silver print"
+    },
+    "aic-150832": {
+      "title": "Old Woman",
+      "artist_display": "Henri de Toulouse-Lautrec\nFrench, 1864-1901",
+      "classification_title": "charcoal"
+    },
+    "aic-151465": {
+      "title": "The Resounding Sea",
+      "artist_display": "Thomas Moran\nAmerican, born England, 1837-1926",
+      "classification_title": "etching"
+    },
+    "aic-151507": {
+      "title": "Landscape with Smokestacks",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "pastel"
+    },
+    "aic-151991": {
+      "title": "Schiller Theatre Building, Chicago, Illinois: Banquet Room Frieze Panel (Restored)",
+      "artist_display": "Adler & Sullivan, Architects\nAmerican, 1881-1895",
+      "classification_title": "architectural fragment"
+    },
+    "aic-152712": {
+      "title": "Breakfast after the Bath",
+      "artist_display": "Edgar Degas\nFrench, 1834-1917",
+      "classification_title": "pastel"
+    },
+    "aic-152747": {
+      "title": "York Harbor, Coast of Maine",
+      "artist_display": "Martin Johnson Heade (American, 1819–1904)",
+      "classification_title": "painting"
+    },
+    "aic-153798": {
+      "title": "Woman in a Garden",
+      "artist_display": "Berthe Morisot (French, 1841–1895)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-154121": {
+      "title": "Calf's Head and Ox Tongue",
+      "artist_display": "Gustave Caillebotte (French, 1848–1894)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-156596": {
+      "title": "Fruit Piece",
+      "artist_display": "Hannah Brown Skeele (American, 1829–1901)",
+      "classification_title": "painting"
+    },
+    "aic-157369": {
+      "title": "Woman's Qun (Skirt)",
+      "artist_display": "Han-Chinese\nChina",
+      "classification_title": "textile"
+    },
+    "aic-157429": {
+      "title": "Woman's Surcoat",
+      "artist_display": "Han-Chinese\nChina",
+      "classification_title": "textile"
+    },
+    "aic-159069": {
+      "title": "Portrait of the Artist’s Mother (Eve)",
+      "artist_display": "Paul Gauguin\nFrench, 1848-1903",
+      "classification_title": "gouache"
+    },
+    "aic-159070": {
+      "title": "Design for a Fan Featuring a Landscape and a Statue of the Goddess Hina",
+      "artist_display": "Paul Gauguin\nFrench, 1848-1903",
+      "classification_title": "gouache"
+    },
+    "aic-159077": {
+      "title": "Seated Tahitian Woman (recto); Standing Tahitian Woman (verso)",
+      "artist_display": "Paul Gauguin\nFrench, 1848-1903",
+      "classification_title": "pen and ink drawings"
+    },
+    "aic-159809": {
+      "title": "Landscape",
+      "artist_display": "Wallace L. DeWolf\nAmerican, 1854-1930",
+      "classification_title": "etching"
+    },
+    "aic-178930": {
+      "title": "National Academy of Design Competition, New York, New York, South Elevation",
+      "artist_display": "Peter Bonnett Wight\nAmerican, 1838–1925",
+      "classification_title": "presentation drawing"
+    },
+    "aic-181720": {
+      "title": "'Crazy Quilt' with Animals",
+      "artist_display": "Designed and executed by Florence Elizabeth Marvin (American, 1856-1916)\nBrooklyn Heights, New York, United States",
+      "classification_title": "textile"
+    },
+    "aic-182381": {
+      "title": "An Abundance of Fruit",
+      "artist_display": "Severin Roesen\nAmerican, born Germany, 1815/17–1872",
+      "classification_title": "oil on canvas"
+    },
+    "aic-182672": {
+      "title": "Panel Entitled \"Femme à marguerite\" (Woman with Daisy)",
+      "artist_display": "Designed by Alphonse Marie Mucha\nCzech, 1860–1939\nProduced by Scheurer Lauth & Cie, founded 1813\nFrance, Mulhouse",
+      "classification_title": "weaving - printed"
+    },
+    "aic-185495": {
+      "title": "The Madame B Album",
+      "artist_display": "Marie-Blanche Hennelle Fournier\nFrench, 1831–1906",
+      "classification_title": "photograph"
+    },
+    "aic-185905": {
+      "title": "Lamp with Hanging Head Dragonfly Shade and Mosaic and Turtleback Base",
+      "artist_display": "Design attributed to Clara Pierce Wolcott Driscoll (American, 1861–1944)\nTiffany Studios (American, 1902–32)\nCorona, New York",
+      "classification_title": "lamp (lighting device)"
+    },
+    "aic-186398": {
+      "title": "At the Window, rue des Trois Frères",
+      "artist_display": "Camille Pissarro\nFrench, 1830–1903",
+      "classification_title": "prints and drawing"
+    },
+    "aic-186425": {
+      "title": "Afternoon Tea",
+      "artist_display": "Jean François Raffaëlli (French, 1850–1924)",
+      "classification_title": "painting"
+    },
+    "aic-186430": {
+      "title": "The Auvers Valley on the Oise River",
+      "artist_display": "Attributed to Pierre Auguste Renoir (French, 1841–1919)\nor Hyacinthe Eugène Meunier (Eugène Murer; French, 1841–1906)",
+      "classification_title": "prints and drawing"
+    },
+    "aic-188629": {
+      "title": "Earthly Paradise",
+      "artist_display": "Paul Gauguin (French, 1848–1903)\nÉmile Bernard (French, 1868–1941)",
+      "classification_title": "sculpture"
+    },
+    "aic-189152": {
+      "title": "Life-Size Black Bass",
+      "artist_display": "Winslow Homer\nAmerican, 1836-1910",
+      "classification_title": "prints and drawing"
+    },
+    "aic-189293": {
+      "title": "Parrot Olla",
+      "artist_display": "Ceramist unknown (Acoma)\nPueblo of Acoma, New Mexico",
+      "classification_title": "vessel"
+    },
+    "aic-191523": {
+      "title": "The Parapet of the Bridge, plate 5 from Le Fleuve",
+      "artist_display": "Édouard Manet (French, 1832-1883)\nwritten by Charles Cros (French, 1842-1888)\nprinted by Auguste Delâtre (French, 1822-1907) and Cochet (French, 19th century)\npublished by Librairie de l'eau-forte (French, 19th century) and Richard Lesclide (French, 1825-1892)",
+      "classification_title": "etching"
+    },
+    "aic-192781": {
+      "title": "Lilies (Corey Memorial Window)",
+      "artist_display": "Tiffany Glass and Decorating Company (American, 1894–1902)\nCorona, New York",
+      "classification_title": "stained glass/leaded glass"
+    },
+    "aic-196029": {
+      "title": "Portrait of a Girl",
+      "artist_display": "Anders Zorn\nSwedish, 1860-1920",
+      "classification_title": "paper"
+    },
+    "aic-196332": {
+      "title": "Plan of Chicago, Chicago, Illinois, Railroad Circuits Diagram",
+      "artist_display": "Daniel Hudson Burnham (American, 1846-1912)\nEdward Herbert Bennett (American, born England, 1874-1954)",
+      "classification_title": "design drawing"
+    },
+    "aic-196336": {
+      "title": "Plate 75 from The Plan of Chicago, 1909: Chicago. Diagram of the City, Showing Complete System of Inner Circuits",
+      "artist_display": "Daniel Hudson Burnham, American, 1846-1912\nEdward Herbert Bennett, American, born England, 1874-1954",
+      "classification_title": "architectural drawing"
+    },
+    "aic-196346": {
+      "title": "Plate 80 from The Plan of Chicago, 1909: Chicago. Diagram of City Center, Showing the Proposed Arrangement of Railroad Passenger Stations, the Complete Traction System, Including Rapid Transit, Subway, and Elevated Roads, and the Circuit Subway Line.",
+      "artist_display": "Daniel Hudson Burnham, American, 1846-1912\nEdward Herbert Bennett, American, born England, 1874-1954",
+      "classification_title": "architectural drawing"
+    },
+    "aic-196375": {
+      "title": "Plate 131 from The Plan of Chicago, 1909: Chicago. Elevation Showing the Group of Buildings Constituting the Proposed Civic Center.",
+      "artist_display": "Daniel Hudson Burnham, American, 1846-1912\nEdward Herbert Bennett, American, born England, 1874-1954\nFernand Janin, delineator, French, 1880-1912",
+      "classification_title": "ink"
+    },
+    "aic-197600": {
+      "title": "Interior of Arcade, Providence, R.I.",
+      "artist_display": "Artist unknown\nAmerican, late 19th century",
+      "classification_title": "photography"
+    },
+    "aic-197767": {
+      "title": "Lincoln Monument in Lincoln Park, from the series \"Chicago and Vicinity\"",
+      "artist_display": "Henry Hamilton Bennett\nAmerican, born Canada, 1843-1908",
+      "classification_title": "photography"
+    },
+    "aic-197773": {
+      "title": "Logan Monument, Lake Front Park, from the series \"Chicago and Vicinity\"",
+      "artist_display": "Henry Hamilton Bennett\nAmerican, born Canada, 1843-1908",
+      "classification_title": "photography"
+    },
+    "aic-197867": {
+      "title": "Still Life with a Copper Pot and Ladle",
+      "artist_display": "François Bonvin\nFrench, 1817-1887",
+      "classification_title": "prints and drawing"
+    },
+    "aic-197955": {
+      "title": "Down the River from the Elbow, No. 145 from the series \"In and About the Dells of the Wisconsin River\"",
+      "artist_display": "Henry Hamilton Bennett\nAmerican, born Canada, 1843-1908",
+      "classification_title": "photography"
+    },
+    "aic-199580": {
+      "title": "Fairmount Park Scenery, Philadelphia, Pa., from the series \"Gems of American Scenery\"",
+      "artist_display": "J.W. & J.S. Moulton\nAmericans, active 1873-1881",
+      "classification_title": "photography"
+    },
+    "aic-199703": {
+      "title": "Entrance to Natural Bridge, No. 16 from the series \"Imperial Gems\"",
+      "artist_display": "H. D. Udall\nAmerican, active late 19th century",
+      "classification_title": "photography"
+    },
+    "aic-202468": {
+      "title": "Teapot",
+      "artist_display": "Royal Worcester Porcelain Factory (1751–2009)\nDesigned by James Hadley (born England, 1837–1903)\nWorcester, England\nEnameled Parian ware",
+      "classification_title": "teapot"
+    },
+    "aic-204686": {
+      "title": "At the Circus: The Bareback Rider (Au Cirque: Écuyère)",
+      "artist_display": "Henri de Toulouse-Lautrec (French, 1864–1901)",
+      "classification_title": "musical instrument"
+    },
+    "aic-210790": {
+      "title": "Alpine Lake, in the Cerro Blanco Mountains, Colorado. One of a group of ten lakes at the main head of Ute Creek. 11.000 feet above sea-level. Cerro Blanco Peak rises 14.269 feet abov the sea, lying to the westward, No. 45 from the series \"Geographical Explorations and Surveys West of the 100th Meridian\"",
+      "artist_display": "Timothy O'Sullivan (American, born Ireland, 1840–1882)\ncommissioned by George Wheeler for the War Department, Corps of Engineers, U.S. Army",
+      "classification_title": "stereograph (albumen)"
+    },
+    "aic-212300": {
+      "title": "The Beach of Les Grands Sables at Le Pouldu",
+      "artist_display": "Paul Sérusier (French, 1864–1927)",
+      "classification_title": "painting"
+    },
+    "aic-215536": {
+      "title": "Black Jack",
+      "artist_display": "John Thomson\nScottish, 1837–1921",
+      "classification_title": "photograph"
+    },
+    "aic-215537": {
+      "title": "Cast-Iron Billy",
+      "artist_display": "John Thomson\nScottish, 1837–1921",
+      "classification_title": "photograph"
+    },
+    "aic-215543": {
+      "title": "The \"Crawlers\"",
+      "artist_display": "John Thomson\nScottish, 1837–1921",
+      "classification_title": "photograph"
+    },
+    "aic-215546": {
+      "title": "The Independent Shoe-Black",
+      "artist_display": "John Thomson\nScottish, 1837–1921",
+      "classification_title": "photograph"
+    },
+    "aic-222002": {
+      "title": "A Woman at the Élysée Montmartre (Femme à l’Élysée Montmartre)",
+      "artist_display": "Louis Anquetin (French, 1861–1932)",
+      "classification_title": "painting"
+    },
+    "aic-223542": {
+      "title": "Third Illustration of the Great Victory of Our Forces on the Yellow Sea (Kokai ni okeru wagagun no taisho, dai san zu)",
+      "artist_display": "Kobayashi Kiyochika\nJapanese, 1847-1915",
+      "classification_title": "woodblock print"
+    },
+    "aic-234877": {
+      "title": "Ad Astra",
+      "artist_display": "Akseli Gallen-Kallela (Finnish, 1865–1931)",
+      "classification_title": "oil on canvas"
+    },
+    "aic-238367": {
+      "title": "Band (from Woman's Trousers)",
+      "artist_display": "China",
+      "classification_title": "costume - needlework"
+    },
+    "aic-243810": {
+      "title": "The Zone (Outside the City Walls)",
+      "artist_display": "Georges Seurat\nFrench, 1859-1891",
+      "classification_title": "drawings (visual works)"
+    },
+    "aic-249956": {
+      "title": "Untitled (Portrait of Seated Woman)",
+      "artist_display": "Unknown maker\nAmerican, 19th century",
+      "classification_title": "portrait"
+    },
+    "aic-250075": {
+      "title": "Untitled (Portrait of a Woman)",
+      "artist_display": "Unknown maker\nAmerican, 19th century",
+      "classification_title": "portrait"
+    },
+    "aic-250178": {
+      "title": "Untitled (Portrait of two Men and one Boy, Dressed in Clown Costumes)",
+      "artist_display": "Unknown maker\nAmerican, 19th century",
+      "classification_title": "portrait"
+    },
+    "aic-250180": {
+      "title": "Untitled (Portrait of Two Men Holding Shovels)",
+      "artist_display": "Unknown maker\nAmerican, 19th century",
+      "classification_title": "portrait"
+    },
+    "aic-250182": {
+      "title": "Untitled (Portrait of Two Men; a Barber and Client)",
+      "artist_display": "Unknown maker\nAmerican, 19th century",
+      "classification_title": "portrait"
+    },
+    "aic-250190": {
+      "title": "Untitled (Portrait of a Carpenter)",
+      "artist_display": "Unknown maker\nAmerican, 19th century",
+      "classification_title": "portrait"
+    },
+    "aic-250234": {
+      "title": "Untitled (Portrait of a Standing Man)",
+      "artist_display": "Unknown maker\nAmerican, 19th century",
+      "classification_title": "portrait"
+    },
+    "aic-250457": {
+      "title": "Venice from the Riva looking toward the Piazzale San Marco",
+      "artist_display": "Félix Ziem (French, 1821–1911)",
+      "classification_title": "oil on panel"
+    },
+    "aic-259166": {
+      "title": "Pair of Vases",
+      "artist_display": "Probably designed by Christopher Dresser (English, born Scotland, 1834-1904)\nPainted by William Mussill (Austrian, active in France and England, 1828-1906)\nMinton (Stoke-on-Trent, England, founded 1793)",
+      "classification_title": "ceramics"
+    },
+    "aic-272685": {
+      "title": "Chimera",
+      "artist_display": "Frédéric Charlot de Courcy (French, 1832–1886)\nAfter Gustave Moreau (French, 1826–1898)",
+      "classification_title": "enamel"
+    }
+  }
+}

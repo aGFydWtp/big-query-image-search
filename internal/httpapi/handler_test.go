@@ -8,9 +8,11 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"sort"
 	"strings"
 	"testing"
 
+	"github.com/aGFydWtp/big-query-image-search/internal/rerank"
 	"github.com/aGFydWtp/big-query-image-search/internal/search"
 	"github.com/aGFydWtp/big-query-image-search/internal/signedurl"
 )
@@ -56,6 +58,31 @@ func (f *fakeRewriter) Rewrite(_ context.Context, q string) (string, error) {
 	f.gotQuery = q
 	return f.rewrite, f.err
 }
+
+// fakeReranker reorders rows by a fixed URI→rank map (lower rank first) so the
+// handler's rerank wiring is verified without a live Gemini call. When err is
+// set it returns the input rows unchanged plus the error, exercising the
+// degrade-to-rrf_vec fallback.
+type fakeReranker struct {
+	called  bool
+	gotRows int            // number of rows the handler passed in (candidate-pool depth)
+	depth   int            // value returned by CandidateDepth()
+	order   map[string]int // URI → sort key (ascending)
+	err     error
+}
+
+func (f *fakeReranker) Rerank(_ context.Context, _ string, rows []search.Row) ([]search.Row, error) {
+	f.called = true
+	f.gotRows = len(rows)
+	if f.err != nil {
+		return rows, f.err
+	}
+	out := append([]search.Row(nil), rows...)
+	sort.SliceStable(out, func(i, j int) bool { return f.order[out[i].ImageURI] < f.order[out[j].ImageURI] })
+	return out, nil
+}
+
+func (f *fakeReranker) CandidateDepth() int { return f.depth }
 
 // fakeSigner returns one Outcome per input URI, signing every URI to a fixed
 // URL unless its URI is listed in failURIs (per-item failure).
@@ -114,7 +141,7 @@ func TestHandler_ValidQueryReturns200WithResults(t *testing.T) {
 		{ImageURI: "gs://b/a.jpg", Distance: 0.1, ContentType: "image/jpeg"},
 		{ImageURI: "gs://b/b.jpg", Distance: 0.2, ContentType: "image/png"},
 	}}
-	h := NewSearchHandler(fs, nil, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
@@ -162,7 +189,7 @@ func TestHandler_ValidQueryReturns200WithResults(t *testing.T) {
 func TestHandler_PassesEnglishRewriteToSearcher(t *testing.T) {
 	fs := &fakeSearcher{rows: []search.Row{{ImageURI: "gs://b/a.jpg", Distance: 0.1}}}
 	fr := &fakeRewriter{rewrite: "should-not-be-used"}
-	h := NewSearchHandler(fs, fr, &fakeSigner{})
+	h := NewSearchHandler(fs, fr, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"海の絵","query_en":"a painting of the sea"}`))
@@ -188,7 +215,7 @@ func TestHandler_PassesEnglishRewriteToSearcher(t *testing.T) {
 func TestHandler_AutoRewriteSuppliesQueryEN(t *testing.T) {
 	fs := &fakeSearcher{rows: []search.Row{{ImageURI: "gs://b/a.jpg", Distance: 0.1}}}
 	fr := &fakeRewriter{rewrite: "a painting of the sea"}
-	h := NewSearchHandler(fs, fr, &fakeSigner{})
+	h := NewSearchHandler(fs, fr, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"海の絵"}`))
@@ -217,7 +244,7 @@ func TestHandler_RewriteFailureFallsBackToRawOnly(t *testing.T) {
 
 	var logBuf bytes.Buffer
 	logger := slog.New(slog.NewTextHandler(&logBuf, nil))
-	h := &searchHandlerImpl{search: fs, rewrite: fr, sign: &fakeSigner{}, logger: logger}
+	h := &searchHandlerImpl{search: fs, rewrite: fr, rerank: rerank.Noop{}, sign: &fakeSigner{}, logger: logger}
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"海の絵"}`))
@@ -233,13 +260,131 @@ func TestHandler_RewriteFailureFallsBackToRawOnly(t *testing.T) {
 	}
 }
 
+// TestHandler_RerankReordersResults verifies the rerank stage reorders the
+// search results before they are formatted and returned (the verified Gemini
+// vision rerank). The fake reranks b ahead of a despite a's better rrf_vec rank.
+func TestHandler_RerankReordersResults(t *testing.T) {
+	fs := &fakeSearcher{rows: []search.Row{
+		{ImageURI: "gs://b/a.jpg", Distance: 0.1},
+		{ImageURI: "gs://b/b.jpg", Distance: 0.2},
+	}}
+	rr := &fakeReranker{order: map[string]int{"gs://b/b.jpg": 0, "gs://b/a.jpg": 1}}
+	h := NewSearchHandler(fs, nil, rr, &fakeSigner{})
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body=%s)", rec.Code, rec.Body.String())
+	}
+	if !rr.called {
+		t.Error("reranker was not invoked")
+	}
+	var resp struct {
+		Results []struct {
+			ImageURI string `json:"image_uri"`
+		} `json:"results"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("response not valid JSON: %v", err)
+	}
+	if len(resp.Results) != 2 || resp.Results[0].ImageURI != "gs://b/b.jpg" {
+		t.Errorf("rerank order not applied; got %+v", resp.Results)
+	}
+}
+
+// TestHandler_RerankFetchesDeeperPoolAndTruncates verifies the verified-uplift
+// flow: when the reranker reports a candidate depth above top_k, the handler
+// fetches that deeper pool, lets the rerank promote a candidate from beyond
+// top_k, and truncates the response back to top_k. Here top_k defaults to 10,
+// depth is 50, search returns 12 rows, and the rerank moves the 12th row to the
+// front so it must appear in the returned top-10.
+func TestHandler_RerankFetchesDeeperPoolAndTruncates(t *testing.T) {
+	rows := make([]search.Row, 12)
+	order := map[string]int{}
+	for i := range rows {
+		uri := "gs://b/" + string(rune('a'+i)) + ".jpg"
+		rows[i] = search.Row{ImageURI: uri, Distance: float64(i) / 100}
+		order[uri] = i // identity order...
+	}
+	promoted := rows[11].ImageURI
+	order[promoted] = -1 // ...except the 12th row is promoted to the front.
+
+	fs := &fakeSearcher{rows: rows}
+	rr := &fakeReranker{depth: 50, order: order}
+	h := NewSearchHandler(fs, nil, rr, &fakeSigner{})
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`)) // top_k omitted → DefaultTopK (10)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body=%s)", rec.Code, rec.Body.String())
+	}
+	if fs.gotTopK != 50 {
+		t.Errorf("searcher fetchK = %d, want 50 (deeper candidate pool for rerank)", fs.gotTopK)
+	}
+	if rr.gotRows != 12 {
+		t.Errorf("reranker saw %d rows, want 12 (full fetched pool)", rr.gotRows)
+	}
+	var resp struct {
+		Results []struct {
+			ImageURI string `json:"image_uri"`
+		} `json:"results"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("response not valid JSON: %v", err)
+	}
+	if len(resp.Results) != 10 {
+		t.Fatalf("response not truncated to top_k; got %d results, want 10", len(resp.Results))
+	}
+	if resp.Results[0].ImageURI != promoted {
+		t.Errorf("promoted candidate not surfaced into top_k; first = %q, want %q", resp.Results[0].ImageURI, promoted)
+	}
+}
+
+// TestHandler_RerankFailureFallsBackToRRFVec verifies a rerank error does NOT
+// fail the request: the rrf_vec (search) order is served and the failure is
+// logged at warn.
+func TestHandler_RerankFailureFallsBackToRRFVec(t *testing.T) {
+	fs := &fakeSearcher{rows: []search.Row{
+		{ImageURI: "gs://b/a.jpg", Distance: 0.1},
+		{ImageURI: "gs://b/b.jpg", Distance: 0.2},
+	}}
+	rr := &fakeReranker{err: errors.New("rerank: upstream failure: 503")}
+
+	var logBuf bytes.Buffer
+	logger := slog.New(slog.NewTextHandler(&logBuf, nil))
+	h := &searchHandlerImpl{search: fs, rewrite: noopRewriter{}, rerank: rr, sign: &fakeSigner{}, logger: logger}
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (rerank failure must not surface; body=%s)", rec.Code, rec.Body.String())
+	}
+	var resp struct {
+		Results []struct {
+			ImageURI string `json:"image_uri"`
+		} `json:"results"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("response not valid JSON: %v", err)
+	}
+	if len(resp.Results) != 2 || resp.Results[0].ImageURI != "gs://b/a.jpg" {
+		t.Errorf("rerank failure must serve rrf_vec order; got %+v", resp.Results)
+	}
+	if !strings.Contains(logBuf.String(), "rerank failed") {
+		t.Errorf("server-side log missing rerank-failure warning; got: %s", logBuf.String())
+	}
+}
+
 // TestHandler_SignedURLRequestedFillsURL verifies signed_url=true populates the
 // signed_url field on each result via the signer (Req 1.2, 3.2).
 func TestHandler_SignedURLRequestedFillsURL(t *testing.T) {
 	fs := &fakeSearcher{rows: []search.Row{
 		{ImageURI: "gs://b/a.jpg", Distance: 0.1},
 	}}
-	h := NewSearchHandler(fs, nil, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"cat","signed_url":true}`))
@@ -267,7 +412,7 @@ func TestHandler_SignedURLRequestedFillsURL(t *testing.T) {
 // 400 and the searcher is NOT invoked (Req 4.1).
 func TestHandler_EmptyQueryReturns400AndSkipsSearch(t *testing.T) {
 	fs := &fakeSearcher{}
-	h := NewSearchHandler(fs, nil, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"   "}`))
@@ -285,7 +430,7 @@ func TestHandler_EmptyQueryReturns400AndSkipsSearch(t *testing.T) {
 // with the common error structure and does not run search.
 func TestHandler_MalformedBodyReturns400(t *testing.T) {
 	fs := &fakeSearcher{}
-	h := NewSearchHandler(fs, nil, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":`))
@@ -305,7 +450,7 @@ func TestHandler_MalformedBodyReturns400(t *testing.T) {
 func TestHandler_InternalErrorReturns5xxNoDetailLeak(t *testing.T) {
 	const rawDetail = "raw bq detail XYZ"
 	fs := &fakeSearcher{err: errors.New(rawDetail)}
-	h := NewSearchHandler(fs, nil, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
@@ -342,7 +487,7 @@ func TestHandler_InternalErrorLogsCauseServerSideOnly(t *testing.T) {
 
 	var logBuf bytes.Buffer
 	logger := slog.New(slog.NewTextHandler(&logBuf, &slog.HandlerOptions{Level: slog.LevelInfo}))
-	h := &searchHandlerImpl{search: fs, rewrite: noopRewriter{}, sign: &fakeSigner{}, logger: logger}
+	h := &searchHandlerImpl{search: fs, rewrite: noopRewriter{}, rerank: rerank.Noop{}, sign: &fakeSigner{}, logger: logger}
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
@@ -375,7 +520,7 @@ func TestHandler_InternalErrorLogsPlainError(t *testing.T) {
 
 	var logBuf bytes.Buffer
 	logger := slog.New(slog.NewTextHandler(&logBuf, nil))
-	h := &searchHandlerImpl{search: fs, rewrite: noopRewriter{}, sign: &fakeSigner{}, logger: logger}
+	h := &searchHandlerImpl{search: fs, rewrite: noopRewriter{}, rerank: rerank.Noop{}, sign: &fakeSigner{}, logger: logger}
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"a dog"}`))
@@ -395,7 +540,7 @@ func TestHandler_InternalErrorLogsPlainError(t *testing.T) {
 // {"results":[]} (a non-null empty array) per Req 4.4 robustness.
 func TestHandler_ZeroRowsReturnsEmptyArray(t *testing.T) {
 	fs := &fakeSearcher{rows: nil}
-	h := NewSearchHandler(fs, nil, &fakeSigner{})
+	h := NewSearchHandler(fs, nil, nil, &fakeSigner{})
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"nothing matches"}`))
@@ -421,7 +566,7 @@ func TestHandler_SignerPartialFailureStillReturns200(t *testing.T) {
 		{ImageURI: "gs://b/bad.jpg", Distance: 0.2},
 	}}
 	signer := &fakeSigner{failURIs: map[string]bool{"gs://b/bad.jpg": true}}
-	h := NewSearchHandler(fs, nil, signer)
+	h := NewSearchHandler(fs, nil, nil, signer)
 
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, newRequest(`{"query":"x","signed_url":true}`))

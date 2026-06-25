@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/aGFydWtp/big-query-image-search/internal/rerank"
 	"github.com/aGFydWtp/big-query-image-search/internal/result"
 	"github.com/aGFydWtp/big-query-image-search/internal/rewrite"
 	"github.com/aGFydWtp/big-query-image-search/internal/search"
@@ -29,6 +30,23 @@ type searcher interface {
 // an empty query_en suppresses the rewrite channel in the SQL query_inputs CTE.
 type queryRewriter interface {
 	Rewrite(ctx context.Context, query string) (string, error)
+}
+
+// queryReranker is the seam over the Gemini vision rerank stage. After search,
+// the handler calls it to reorder the rrf_vec top-N by per-image relevance (the
+// verified winner in docs/eval-results/comparison-vs-reference.md: overall
+// nDCG@10 0.670 → 0.736). Rerank failures are NEVER fatal: the handler logs at
+// warn and serves the original rrf_vec order. The production implementation is
+// *rerank.VertexReranker; a nil reranker (or rerank.Noop) leaves the order
+// unchanged, which is the default since the stage is off unless RERANK_ENABLED.
+type queryReranker interface {
+	Rerank(ctx context.Context, query string, rows []search.Row) ([]search.Row, error)
+	// CandidateDepth is how many candidates the reranker wants to rescore. The
+	// handler fetches at least this many rows (then truncates back to the user's
+	// top_k after reranking) so a relevant image ranked beyond top_k by rrf_vec
+	// can be promoted into the returned page — the source of the verified uplift.
+	// A disabled reranker returns 0, leaving the fetch at top_k.
+	CandidateDepth() int
 }
 
 // signer is the seam for batch signed-URL generation. The production
@@ -78,6 +96,7 @@ const (
 type searchHandlerImpl struct {
 	search  searcher
 	rewrite queryRewriter
+	rerank  queryReranker
 	sign    signer
 	// logger sinks server-side diagnostics (e.g. the internal cause of a 5xx)
 	// that are deliberately withheld from the client response. Never nil after
@@ -91,12 +110,17 @@ type searchHandlerImpl struct {
 // slog.Default() (Cloud Run routes stderr to Cloud Logging), so no logger
 // plumbing is required at the call site. A nil rewriter is normalized to
 // rewrite.Noop so the rrf_vec path safely degrades to raw-only search when the
-// rewriter is disabled.
-func NewSearchHandler(s searcher, rw queryRewriter, sg signer) http.Handler {
+// rewriter is disabled. A nil reranker is likewise normalized to rerank.Noop so
+// the result order passes through unchanged when the rerank stage is off
+// (RERANK_ENABLED=false, the default).
+func NewSearchHandler(s searcher, rw queryRewriter, rr queryReranker, sg signer) http.Handler {
 	if rw == nil {
 		rw = rewrite.Noop{}
 	}
-	return &searchHandlerImpl{search: s, rewrite: rw, sign: sg, logger: slog.Default()}
+	if rr == nil {
+		rr = rerank.Noop{}
+	}
+	return &searchHandlerImpl{search: s, rewrite: rw, rerank: rr, sign: sg, logger: slog.Default()}
 }
 
 // causer is the seam over *search.internalError, which retains the raw BigQuery
@@ -144,7 +168,16 @@ func (h *searchHandlerImpl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	rows, err := h.search.Search(r.Context(), validated.Query, queryEN, validated.TopK)
+	// When reranking is enabled, fetch a deeper candidate pool than the user's
+	// top_k so the rerank can promote a relevant image ranked beyond top_k by
+	// rrf_vec into the returned page; results are truncated back to top_k after
+	// reranking. A disabled reranker reports depth 0, leaving fetchK at top_k.
+	fetchK := validated.TopK
+	if d := h.rerank.CandidateDepth(); d > fetchK {
+		fetchK = d
+	}
+
+	rows, err := h.search.Search(r.Context(), validated.Query, queryEN, fetchK)
 	if err != nil {
 		// Record the internal cause server-side ONLY; the client still receives a
 		// generic message with no upstream/internal detail (Req 4.3). Without this
@@ -153,6 +186,24 @@ func (h *searchHandlerImpl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.logSearchFailure(r.Context(), err)
 		writeError(w, http.StatusInternalServerError, codeInternal, "search failed, please retry later")
 		return
+	}
+
+	// Gemini vision rerank of the rrf_vec candidates. A rerank error is
+	// non-fatal: Rerank returns the original rows so the handler serves the
+	// rrf_vec order, logging at warn (mirrors the rewrite-failure fallback). The
+	// Noop reranker (rerank disabled) returns rows unchanged and never errors.
+	if reranked, rerr := h.rerank.Rerank(r.Context(), validated.Query, rows); rerr != nil {
+		h.logger.LogAttrs(r.Context(), slog.LevelWarn, "rerank failed, serving rrf_vec order",
+			slog.String("error", rerr.Error()))
+	} else {
+		rows = reranked
+	}
+
+	// Truncate the (possibly deeper) candidate pool back to the requested page
+	// size. On the no-rerank path fetchK == top_k so this is a no-op; after a
+	// rerank (or its rrf_vec fallback) it returns the reordered top_k.
+	if len(rows) > validated.TopK {
+		rows = rows[:validated.TopK]
 	}
 
 	results := result.Format(rows)

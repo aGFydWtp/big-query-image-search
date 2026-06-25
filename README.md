@@ -114,6 +114,11 @@ gcloud run deploy image-search-api --image <IMAGE> --region <REGION>
 RRF(k=60) で融合する。未指定時はサーバ側 Vertex AI（`gemini-2.5-flash`）が英語リライトを自動生成して
 2 系統目に用いる（`REWRITE_ENABLED=false` や生成失敗時は生クエリのみの単一チャネル検索にフォールバック）。
 
+`RERANK_ENABLED=true` のときは、RRF 融合後の上位 N 件（`RERANK_TOP_N`、既定 50）について各候補画像を
+Gemini（`gemini-2.5-flash`）に渡して関連性を 0〜10 で採点し、スコア降順（同点は元の rrf_vec 順）に並べ替える。
+検証では overall nDCG@10 が 0.670 → 0.736 に改善（詳細は `docs/eval-results/comparison-vs-reference.md` の
+「rerank Phase 1b」）。採点失敗時は rrf_vec 順にフォールバックする。コスト（N=50 で ≈$0.027/検索）のため既定は無効。
+
 レスポンス:
 
 ```json
@@ -149,6 +154,11 @@ RRF(k=60) で融合する。未指定時はサーバ側 Vertex AI（`gemini-2.5-
 | `IMAGE_BUCKET` | 画像保管 GCS バケット |
 | `RUN_SA_EMAIL` | Cloud Run 実行 SA（署名付き URL 発行に使用） |
 | `SIGNED_URL_EXPIRY` | 署名付き URL の有効期限（例 `15m`） |
+| `RERANK_ENABLED` | Gemini vision rerank ステージの有効化。既定 `false`（N=50 で ≈$0.027/検索のため明示的に有効化する） |
+| `RERANK_MODEL` | rerank に用いる Vertex AI Gemini モデル（既定 `gemini-2.5-flash`） |
+| `RERANK_TOP_N` | rerank する rrf_vec 上位件数（既定 `50`。下げるとコスト比例減） |
+| `RERANK_WORKERS` | 画像採点の同時実行数（既定 `6`） |
+| `RERANK_TIMEOUT` | 画像 1 枚あたり採点呼び出しのタイムアウト（既定 `8s`） |
 
 ## 認証（IAP）
 

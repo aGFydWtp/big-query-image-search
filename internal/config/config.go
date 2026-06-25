@@ -31,6 +31,23 @@
 //	REWRITE_TIMEOUT   (optional) Per-call rewrite timeout as a Go duration.
 //	                  Defaults to 1500ms (rewrite failure degrades to raw-only,
 //	                  so a tight ceiling keeps p99 search latency bounded).
+//	RERANK_ENABLED    (optional) Enable the Gemini vision rerank stage that
+//	                  reorders the rrf_vec top-N by per-image relevance (verified
+//	                  winner: overall nDCG@10 0.670 → 0.736, see
+//	                  docs/eval-results/comparison-vs-reference.md "rerank Phase
+//	                  1b"). Defaults to FALSE because it costs ≈$0.027/search at
+//	                  N=50 (≈$4,000/month at 5,000 searches/day); enable
+//	                  explicitly and/or lower RERANK_TOP_N to trade quality for
+//	                  cost. On any scoring failure the search degrades to the
+//	                  rrf_vec order.
+//	RERANK_MODEL      (optional) Vertex AI Gemini model used to score images.
+//	                  Defaults to "gemini-2.5-flash" (the verified model).
+//	RERANK_TOP_N      (optional) Number of top rrf_vec candidates to rerank.
+//	                  Defaults to 50. Lower values cut cost proportionally.
+//	RERANK_WORKERS    (optional) Max concurrent per-image scoring calls.
+//	                  Defaults to 6.
+//	RERANK_TIMEOUT    (optional) Per-image scoring call timeout as a Go duration.
+//	                  Defaults to 8s.
 //
 // No environment-dependent value is hardcoded. Only the shared-contract model
 // object name default and the signed-URL expiry default are code defaults.
@@ -39,6 +56,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -61,6 +79,23 @@ const defaultRewriteModel = "gemini-2.5-flash"
 // cannot stall the search request. On timeout the handler degrades to
 // raw-only via SQL COALESCE.
 const defaultRewriteTimeout = 1500 * time.Millisecond
+
+// defaultRerankModel is the Vertex AI Gemini model used to score candidate
+// images in the rerank stage (the verified winning model).
+const defaultRerankModel = "gemini-2.5-flash"
+
+// defaultRerankTopN is the number of top rrf_vec candidates rescored by the
+// rerank stage when RERANK_TOP_N is unset (the verified depth).
+const defaultRerankTopN = 50
+
+// defaultRerankWorkers bounds concurrent per-image scoring calls when
+// RERANK_WORKERS is unset.
+const defaultRerankWorkers = 6
+
+// defaultRerankTimeout caps each per-image scoring call so a slow Vertex AI
+// response cannot stall the search request; on failure the search degrades to
+// the rrf_vec order.
+const defaultRerankTimeout = 8 * time.Second
 
 // Config holds the resolved runtime configuration.
 type Config struct {
@@ -88,6 +123,21 @@ type Config struct {
 	RewriteModel string
 	// RewriteTimeout caps each rewrite call (env REWRITE_TIMEOUT, default 1500ms).
 	RewriteTimeout time.Duration
+	// RerankEnabled toggles the Gemini vision rerank stage that reorders the
+	// rrf_vec top-N by per-image relevance (env RERANK_ENABLED, default false).
+	RerankEnabled bool
+	// RerankModel is the Vertex AI Gemini model used to score images
+	// (env RERANK_MODEL, default "gemini-2.5-flash").
+	RerankModel string
+	// RerankTopN is the number of top rrf_vec candidates to rerank
+	// (env RERANK_TOP_N, default 50).
+	RerankTopN int
+	// RerankWorkers bounds concurrent per-image scoring calls
+	// (env RERANK_WORKERS, default 6).
+	RerankWorkers int
+	// RerankTimeout caps each per-image scoring call (env RERANK_TIMEOUT,
+	// default 8s).
+	RerankTimeout time.Duration
 }
 
 // Load reads configuration from environment variables and validates it.
@@ -109,6 +159,11 @@ func Load() (*Config, error) {
 		envRewriteEnabled  = "REWRITE_ENABLED"
 		envRewriteModel    = "REWRITE_MODEL"
 		envRewriteTimeout  = "REWRITE_TIMEOUT"
+		envRerankEnabled   = "RERANK_ENABLED"
+		envRerankModel     = "RERANK_MODEL"
+		envRerankTopN      = "RERANK_TOP_N"
+		envRerankWorkers   = "RERANK_WORKERS"
+		envRerankTimeout   = "RERANK_TIMEOUT"
 	)
 
 	var problems []string
@@ -180,6 +235,62 @@ func Load() (*Config, error) {
 			problems = append(problems, fmt.Sprintf("invalid %s %q: must be positive", envRewriteTimeout, raw))
 		} else {
 			cfg.RewriteTimeout = d
+		}
+	}
+
+	// RERANK_ENABLED: opt-IN toggle (default false) for the Gemini vision rerank
+	// stage. Default is off because reranking N=50 costs ≈$0.027/search; operators
+	// enable it (and/or tune RERANK_TOP_N) deliberately.
+	cfg.RerankEnabled = false
+	if raw := strings.TrimSpace(os.Getenv(envRerankEnabled)); raw != "" {
+		switch strings.ToLower(raw) {
+		case "false", "0", "no", "off":
+			cfg.RerankEnabled = false
+		case "true", "1", "yes", "on":
+			cfg.RerankEnabled = true
+		default:
+			problems = append(problems, fmt.Sprintf("invalid %s %q: expected true/false", envRerankEnabled, raw))
+		}
+	}
+
+	cfg.RerankModel = strings.TrimSpace(os.Getenv(envRerankModel))
+	if cfg.RerankModel == "" {
+		cfg.RerankModel = defaultRerankModel
+	}
+
+	cfg.RerankTopN = defaultRerankTopN
+	if raw := strings.TrimSpace(os.Getenv(envRerankTopN)); raw != "" {
+		n, err := strconv.Atoi(raw)
+		if err != nil {
+			problems = append(problems, fmt.Sprintf("invalid %s %q: %v", envRerankTopN, raw, err))
+		} else if n <= 0 {
+			problems = append(problems, fmt.Sprintf("invalid %s %q: must be positive", envRerankTopN, raw))
+		} else {
+			cfg.RerankTopN = n
+		}
+	}
+
+	cfg.RerankWorkers = defaultRerankWorkers
+	if raw := strings.TrimSpace(os.Getenv(envRerankWorkers)); raw != "" {
+		n, err := strconv.Atoi(raw)
+		if err != nil {
+			problems = append(problems, fmt.Sprintf("invalid %s %q: %v", envRerankWorkers, raw, err))
+		} else if n <= 0 {
+			problems = append(problems, fmt.Sprintf("invalid %s %q: must be positive", envRerankWorkers, raw))
+		} else {
+			cfg.RerankWorkers = n
+		}
+	}
+
+	cfg.RerankTimeout = defaultRerankTimeout
+	if raw := strings.TrimSpace(os.Getenv(envRerankTimeout)); raw != "" {
+		d, err := time.ParseDuration(raw)
+		if err != nil {
+			problems = append(problems, fmt.Sprintf("invalid %s %q: %v", envRerankTimeout, raw, err))
+		} else if d <= 0 {
+			problems = append(problems, fmt.Sprintf("invalid %s %q: must be positive", envRerankTimeout, raw))
+		} else {
+			cfg.RerankTimeout = d
 		}
 	}
 

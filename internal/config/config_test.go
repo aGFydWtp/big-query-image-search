@@ -166,3 +166,89 @@ func TestLoad_AggregatesMissing(t *testing.T) {
 		t.Errorf("aggregated error should name both PROJECT_ID and REGION, got: %v", err)
 	}
 }
+
+// TestLoad_RerankDefaults verifies the rerank stage defaults: OFF (cost guard),
+// model gemini-2.5-flash, N=50, workers=6, timeout 8s.
+func TestLoad_RerankDefaults(t *testing.T) {
+	setEnv(t, requiredEnv()) // no RERANK_* set
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() returned unexpected error: %v", err)
+	}
+	if cfg.RerankEnabled {
+		t.Error("RerankEnabled default = true, want false (cost guard)")
+	}
+	if cfg.RerankModel != "gemini-2.5-flash" {
+		t.Errorf("RerankModel = %q, want gemini-2.5-flash", cfg.RerankModel)
+	}
+	if cfg.RerankTopN != 50 {
+		t.Errorf("RerankTopN = %d, want 50", cfg.RerankTopN)
+	}
+	if cfg.RerankWorkers != 6 {
+		t.Errorf("RerankWorkers = %d, want 6", cfg.RerankWorkers)
+	}
+	if cfg.RerankTimeout != 8*time.Second {
+		t.Errorf("RerankTimeout = %v, want 8s", cfg.RerankTimeout)
+	}
+}
+
+// TestLoad_RerankEnabledAndTuned verifies the switchable knobs are honored.
+func TestLoad_RerankEnabledAndTuned(t *testing.T) {
+	env := requiredEnv()
+	env["RERANK_ENABLED"] = "true"
+	env["RERANK_MODEL"] = "gemini-2.5-pro"
+	env["RERANK_TOP_N"] = "20"
+	env["RERANK_WORKERS"] = "3"
+	env["RERANK_TIMEOUT"] = "5s"
+	setEnv(t, env)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() returned unexpected error: %v", err)
+	}
+	if !cfg.RerankEnabled {
+		t.Error("RERANK_ENABLED=true did not enable rerank")
+	}
+	if cfg.RerankModel != "gemini-2.5-pro" {
+		t.Errorf("RerankModel = %q, want gemini-2.5-pro", cfg.RerankModel)
+	}
+	if cfg.RerankTopN != 20 {
+		t.Errorf("RerankTopN = %d, want 20", cfg.RerankTopN)
+	}
+	if cfg.RerankWorkers != 3 {
+		t.Errorf("RerankWorkers = %d, want 3", cfg.RerankWorkers)
+	}
+	if cfg.RerankTimeout != 5*time.Second {
+		t.Errorf("RerankTimeout = %v, want 5s", cfg.RerankTimeout)
+	}
+}
+
+// TestLoad_RerankInvalidValues verifies non-numeric / non-positive knobs and a
+// bad enabled flag are rejected with a naming error.
+func TestLoad_RerankInvalidValues(t *testing.T) {
+	cases := map[string]string{
+		"RERANK_TOP_N":   "zero",
+		"RERANK_WORKERS": "-1",
+		"RERANK_TIMEOUT": "soon",
+		"RERANK_ENABLED": "maybe",
+	}
+	for name, bad := range cases {
+		t.Run(name, func(t *testing.T) {
+			env := requiredEnv()
+			env[name] = bad
+			setEnv(t, env)
+
+			cfg, err := Load()
+			if err == nil {
+				t.Fatalf("Load() expected error for invalid %s=%q, got nil", name, bad)
+			}
+			if cfg != nil {
+				t.Error("Load() should return nil config on error")
+			}
+			if !strings.Contains(err.Error(), name) {
+				t.Errorf("error should name %s, got: %v", name, err)
+			}
+		})
+	}
+}
